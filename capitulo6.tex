@@ -1,0 +1,607 @@
+
+%=====================================================
+\section{Introducción}
+%=====================================================
+
+Si encontramos $x, y$ tales que
+\begin{equation}\label{eq:cong}
+x^2 \equiv y^2 \pmod{n},
+\qquad x \not\equiv \pm y \pmod{n},
+\end{equation}
+entonces $n \mid (x-y)(x+y)$ pero $n$ no divide a ninguno de los dos factores.
+Por tanto $\gcd(x-y, n)$ y $\gcd(x+y, n)$ son factores \textbf{no triviales} de $n$,
+cada uno con probabilidad $\approx \tfrac{1}{2}$.
+
+El problema: hallar cuadrados perfectos al azar es muy raro. Sin embargo, la observación
+clave de Dixon (1981) es que resulta mucho más fácil encontrar números
+\emph{B-suaves}.
+
+%=====================================================
+\section{Números B-suaves}
+%=====================================================
+
+\begin{definicion}[Número $B$-suave]
+
+Sea $B \ge 2$ un entero. Un entero positivo $m$ es \emph{$B$-suave} tambien llamados 
+\emph{$B$-liso}, (en inglés, \emph{$B$-smooth}) si todos sus factores primos satisfacen
+$p \le B$. 
+
+En otras palabras, si
+\begin{equation}
+m = \prod_{p \le B} p^{a_p}
+\qquad (a_p \ge 0),
+\end{equation}
+es decir, $m$ se factoriza completamente usando únicamente primos de la base
+\begin{equation}
+\mathcal{P} = \{\, p \text{ primo} : p \le B \,\}.
+\end{equation}
+\end{definicion}
+
+%\subsection*{Ejemplos}
+\begin{ejemplo}
+\begin{itemize}
+    \item \( 24 = 2^3 \times 3 \). Sus factores primos son \( 2 \) y \( 3 \).  
+    Si \( B = 3 \), entonces \( 24 \) es \( 3 \)-smooth porque \( 2 \le 3 \) y \( 3 \le 3 \).
+
+    \item \( 25 = 5^2 \). Su único factor primo es \( 5 \).  
+    Es \( 5 \)-smooth, pero \textbf{no} es \( 3 \)-smooth porque \( 5 > 3 \).
+
+    \item \( 30 = 2 \times 3 \times 5 \).  
+    Es \( 5 \)-smooth, pero no \( 3 \)-smooth.
+
+    \item Los números de la forma \( 2^a 3^b \) (como \( 1, 2, 3, 4, 6, 8, 9, 12, \dots \)) son \( 3 \)-smooth.  
+    A veces se les llama \textit{números regulares}.
+\end{itemize}
+\end{ejemplo}
+%=====================================================
+\section{Observaciones}
+%=====================================================
+
+\begin{itemize}
+\item El entero $m = 1$ es $B$-suave para todo $B$: no tiene factores primos
+      que lo impidan.
+\item Los números $B$-suaves pueden ser grandes gracias a las potencias:
+      $2^{100}$ es $7$-suave aunque sea enorme.
+\item Cuanto menor es $B$, \emph{menos} números son $B$-suaves
+      (la condición es más exigente); cuanto mayor es $B$, más números
+      califican.
+\item En el algoritmo de Dixon, exigir que $z^2 \bmod n$ sea $B$-suave garantiza
+      que podemos escribir
+      \begin{equation}
+      z^2 \equiv \prod_{p \in \mathcal{P}} p^{a_p} \pmod{n},
+      \end{equation}
+      y el vector de exponentes $(a_p)_{p \in \mathcal{P}}$ es lo que se usa
+      en la eliminación gaussiana sobre $\mathbb{F}_2$.
+\end{itemize}
+%=====================================================
+\section{Verificación paso a paso}
+%=====================================================
+
+\subsection{Criterio}
+
+Para comprobar si $m$ es $B$-suave, se divide $m$ sucesivamente entre cada
+primo $p \le B$, tantas veces como sea posible:
+\begin{equation}
+m \;\longrightarrow\; \frac{m}{p} \;\longrightarrow\;
+\frac{m}{p^2} \;\longrightarrow\; \cdots
+\end{equation}
+Al final:
+\begin{itemize}
+\item si el residuo es $1$, entonces $m$ \textbf{es} $B$-suave;
+\item si el residuo es un entero $> 1$, ese residuo tiene todos sus factores
+      primos $> B$, y $m$ \textbf{no es} $B$-suave.
+\end{itemize}
+
+%\subsection{Ejemplo 1: \,$m = 588$, $B = 7$}
+\begin{ejemplo}[$m = 588$, $B = 7$]
+Base de factores: $\mathcal{P} = \{2, 3, 5, 7\}$.
+
+\begin{align}
+588 &= 2 \cdot 294 \\
+294 &= 2 \cdot 147 \quad\Rightarrow\quad 588 = 2^2 \cdot 147 \\[4pt]
+147 &= 3 \cdot 49 \\
+49  &= 7 \cdot 7 \quad\;\;\Rightarrow\quad 147 = 3 \cdot 7^2
+\end{align}
+
+Por tanto:
+\begin{equation}
+588 = 2^2 \cdot 3^1 \cdot 5^0 \cdot 7^2,
+\end{equation}
+todos los primos son $\le 7$:
+\begin{equation}
+588 \text{ es } 7\text{-suave}, \quad
+\text{vector de exponentes } (2, 1, 0, 2).
+\end{equation}
+\end{ejemplo}
+
+%\subsection{Ejemplo 2: \,$m = 110$, $B = 7$}
+\begin{ejemplo}[$m = 110$, $B = 7$]
+
+\begin{align}
+110 &= 2 \cdot 55,\\
+55  &= 5 \cdot 11.
+\end{align}
+
+El residuo final es $11$, y $11 > 7$:
+\begin{equation}
+110 = 2 \cdot 5 \cdot 11 \text{ NO es } 7\text{-suave}.
+\end{equation}
+\end{ejemplo}
+
+\section{Sistemas lineales sobre $\mathbb{F}_2$ y Eliminación Gaussiana}
+
+Un \textbf{sistema lineal sobre $\mathbb{F}_2$} es un conjunto de ecuaciones lineales cuyos coeficientes, variables y términos independientes pertenecen al \textbf{cuerpo binario $\mathbb{F}_2$} (también denotado como $\mathbb{Z}_2$), el cual está compuesto únicamente por los elementos $\{0, 1\}$.
+
+La aritmética en $\mathbb{F}_2$ se rige por la operación \textbf{XOR} (O exclusivo) para la suma y un \textbf{AND lógico} para la multiplicación:
+\begin{itemize}
+    \item \textbf{Suma (XOR):} $0 + 0 = 0$, \quad $0 + 1 = 1$, \quad $1 + 0 = 1$, \quad \textbf{$1 + 1 = 0$}.
+    \item \textbf{Multiplicación (AND):} $0 \cdot 0 = 0$, \quad $0 \cdot 1 = 0$, \quad $1 \cdot 0 = 0$, \quad $1 \cdot 1 = 1$.
+\end{itemize}
+
+Dado que $1 + 1 = 0$, se cumple que $1 = -1$. Por lo tanto, en este cuerpo \textbf{la suma y la resta son operaciones idénticas}.
+
+\subsection{La Eliminación Gaussiana en $\mathbb{F}_2$}
+
+Para resolver un sistema de la forma $Ax = b$ en este contexto, se aplica el algoritmo clásico de eliminación gaussiana para escalonar la matriz. Sin embargo, trabajar sobre $\mathbb{F}_2$ ofrece grandes ventajas computacionales:
+\begin{enumerate}
+    \item \textbf{Ausencia de divisiones:} El único pivote posible no nulo es el $1$, por lo que no es necesario realizar divisiones ni normalizar filas.
+    \item \textbf{Simplificación operativa:} Para eliminar un $1$ debajo de un pivote, simplemente se suma la fila del pivote a la fila que se desea limpiar (operación suma/resta).
+    \item \textbf{Eficiencia algorítmica:} Las filas de la matriz se pueden almacenar en memoria como vectores de bits (\textit{bitsets}). Esto permite que la eliminación gaussiana se ejecute mediante operaciones lógicas combinadas a nivel de hardware, acelerando drásticamente el proceso.
+\end{enumerate}
+
+\begin{ejemplo}
+
+Considérese el siguiente sistema de 3 ecuaciones con 3 incógnitas ($x_1, x_2, x_3$):
+\begin{align*}
+    x_1 + x_2 &= 1 \\
+    x_2 + x_3 &= 0 \\
+    x_1 + x_2 + x_3 &= 1
+\end{align*}
+
+La matriz aumentada asociada al sistema es:
+\[
+\left(\begin{array}{ccc|c}
+1 & 1 & 0 & 1 \\
+0 & 1 & 1 & 0 \\
+1 & 1 & 1 & 1
+\end{array}\right)
+\]
+
+Tomando el elemento $(1,1)$ como pivote, se procede a eliminar el $1$ de la tercera fila sumando la fila 1 a la fila 3 ($F_3 \leftarrow F_3 + F_1$):
+\[
+F_3 = (1, 1, 1 \mid 1) \oplus (1, 1, 0 \mid 1) = (0, 0, 1 \mid 0)
+\]
+
+La matriz resultante en forma escalonada es:
+\[
+\left(\begin{array}{ccc|c}
+1 & 1 & 0 & 1 \\
+0 & 1 & 1 & 0 \\
+0 & 0 & 1 & 0
+\end{array}\right)
+\]
+
+Mediante sustitución hacia atrás, se obtienen directamente las soluciones:
+\begin{align*}
+    F_3 &\implies \mathbf{x_3 = 0} \\
+    F_2 &\implies x_2 + x_3 = 0 \implies x_2 + 0 = 0 \implies \mathbf{x_2 = 0} \\
+    F_1 &\implies x_1 + x_2 = 1 \implies x_1 + 0 = 1 \implies \mathbf{x_1 = 1}
+\end{align*}
+
+La solución única del sistema es $(x_1, x_2, x_3) = (1, 0, 0)$.
+\end{ejemplo}
+
+%=====================================================
+\section{Lema central}
+%=====================================================
+
+\begin{lema}
+Si $\varepsilon \in \mathbb{F}_2^m$ cumple
+$\sum_i \varepsilon_i \alpha_i \equiv 0 \pmod 2$, entonces
+$x = \prod z_i^{\varepsilon_i}$ y
+$y = \prod_j p_j^{\frac{1}{2}\sum_i \varepsilon_i \alpha_{ij}}$
+satisfacen $x^2 \equiv y^2 \pmod n$.
+
+Donde:
+\begin{itemize}
+\item \(z_{i}\): Son los valores aleatorios (o secuenciales) que elegimos para probar.
+\item \(p_{j}\): Son los números primos que pertenecen a nuestra base de primos.
+\item \(\mathcal{B} = \{p_1, p_2, \dots, p_m\}\).\(\alpha _{ij}\): Es el exponente del primo
+ \(p_{j}\) en la factorización del residuo de \(z_i^2 \pmod n\). Es decir: \(z_{i}^{2}\equiv p_{1}^{\alpha _{i1}}\cdot p_{2}^{\alpha _{i2}}\cdots p_{m}^{\alpha _{im}}\mathinner{\;\left(\mod \,n\right)}\)
+ \item \(\alpha _{i}\): Es el vector de exponentes correspondiente a \(z_{i}\), definido como 
+ \(\alpha_i = (\alpha_{i1}, \alpha_{i2}, \dots, \alpha_{im})\).
+\item \(\varepsilon \in \mathbb{F}_2^m\): Es un vector de ceros y unos (\(0\) o \(1\)). Si \(\varepsilon_i = 1\), incluimos el número \(z_{i}\) en nuestra combinación; si \(\varepsilon_i = 0\), lo ignoramos.
+\end{itemize}
+\end{lema}
+
+\begin{proof}
+$x^2 \equiv \prod_j p_j^{\sum_i \varepsilon_i \alpha_{ij}} = y^2 \pmod n$,
+pues cada exponente es par.
+\end{proof}
+
+%=====================================================
+\section{El algoritmo de Dixon}
+%=====================================================
+
+\begin{enumerate}[label=\textbf{Paso \arabic*.}, leftmargin=2.2cm]
+\item \textbf{Base de factores.} Elegir una cota $B$ y el conjunto
+$\mathcal{P} = \{p_1, p_2, \dots, p_k\}$ de primos $p \le B$.
+
+\item \textbf{Recolectar relaciones.} Para $z$ al azar, factorizar $z^2 \bmod n$.
+Conservar cada $z$ con $z^2 \bmod n$ $B$-suave:
+\begin{equation}
+z_i^2 \equiv \prod_{j=1}^{k} p_j^{\alpha_{ij}} \pmod{n},
+\end{equation}
+con vector de exponentes $\alpha_i = (\alpha_{i1}, \dots, \alpha_{ik})$.
+
+\item \textbf{Combinar relaciones.} Con al menos $k+1$ relaciones, buscar $S$
+tal que $\sum_{i \in S} \alpha_{ij} \equiv 0 \pmod 2$ para todo $j$
+(sistema lineal sobre $\mathbb{F}_2$, eliminación gaussiana).
+
+\item \textbf{Congruencia.} Con $x = \prod_{i \in S} z_i$ y
+$y = \prod_{j} p_j^{\,\beta_j}$, $2\beta_j = \sum_{i\in S}\alpha_{ij}$:
+$x^2 \equiv y^2 \pmod n$.
+
+\item \textbf{Extraer el factor.}
+$d = \gcd(x - y, n)$, $d' = \gcd(x + y, n)$.
+Si $1 < d < n$, factor encontrado; si es trivial, repetir.
+\end{enumerate}
+
+\begin{ejemplo}[$n = 84923$, $B = 7$]
+
+Base de factores: $\mathcal{P} = \{2, 3, 5, 7\}$. Con $z = 505$:
+\begin{equation}
+505^2 \bmod 84923 = 256 = 16^2 = 2^8,
+\end{equation}
+vector de exponentes $(8,0,0,0)$: \emph{todos pares}. Entonces
+\begin{equation}
+505^2 \equiv 16^2 \pmod{84923},
+\end{equation}
+\begin{align}
+\gcd(505 - 16, 84923) &= \gcd(489, 84923) = 163,\\
+\gcd(505 + 16, 84923) &= \gcd(521, 84923) = 521.
+\end{align}
+Verificación: $163 \times 521 = 84923$.\quad\checkmark
+\end{ejemplo}
+
+\begin{ejemplo}[Ejemplo con Eliminación Gaussiana]
+
+Para ilustrar el funcionamiento integrado del algoritmo de Dixon y la resolución de sistemas lineales sobre $\mathbb{F}_2$, procederemos a factorizar el número entero compuesto \textbf{$N = 1517$}.
+\begin{enumerate}
+\item Definición de la Base de Primos
+
+Primero, calculamos el límite inferior para los valores de $x$: $\sqrt{1517} \approx 38.9$. Definimos una base de primos pequeña $P$ para evaluar la condición de $B$-suavidad:
+\[
+P = \{2, 3, 5, 7\}
+\]
+
+\item Recolección de Relaciones Suaves
+
+Buscamos valores aleatorios o secuenciales $x > \sqrt{N}$ tales que el residuo de $x^2 \pmod{N}$ se descomponga por completo utilizando únicamente los elementos de la base $P$. Tras realizar las pruebas pertinentes, hallamos las siguientes cuatro relaciones válidas:
+\begin{enumerate}
+    \item Para $x_1 = 62$: \quad $62^2 \pmod{1517} = 810 = 2^1 \cdot 3^4 \cdot 5^1 \cdot 7^0 \implies \mathbf{v_1} = (1, 4, 1, 0)$
+    \item Para $x_2 = 69$: \quad $69^2 \pmod{1517} = 210 = 2^1 \cdot 3^1 \cdot 5^1 \cdot 7^1 \implies \mathbf{v_2} = (1, 1, 1, 1)$
+    \item Para $x_3 = 71$: \quad $71^2 \pmod{1517} = 490 = 2^1 \cdot 3^0 \cdot 5^1 \cdot 7^2 \implies \mathbf{v_3} = (1, 0, 1, 2)$
+    \item Para $x_4 = 89$: \quad $89^2 \pmod{1517} = 336 = 2^4 \cdot 3^1 \cdot 5^0 \cdot 7^1 \implies \mathbf{v_4} = (0, 1, 0, 1)$
+\end{enumerate}
+
+\item Paso 3: Construcción de la Matriz sobre $\mathbb{F}_2$
+
+Para formar un cuadrado perfecto multiplicando estas relaciones, requerimos que la suma de los vectores de exponentes sea par en todas sus componentes. Reducimos los vectores $\mathbf{v}_i$ módulo 2:
+\begin{align*}
+    \mathbf{v_1} \pmod 2 &= (1, 0, 1, 0) \\
+    \mathbf{v_2} \pmod 2 &= (1, 1, 1, 1) \\
+    \mathbf{v_3} \pmod 2 &= (1, 0, 1, 0) \\
+    \mathbf{v_4} \pmod 2 &= (0, 1, 0, 1)
+\end{align*}
+
+Planteamos el sistema homogéneo cuya matriz asociada dispone las columnas en el orden de los factores primos $\{2, 3, 5, 7\}$:
+\[
+M = \begin{pmatrix}
+1 & 0 & 1 & 0 \\
+1 & 1 & 1 & 1 \\
+1 & 0 & 1 & 0 \\
+0 & 1 & 0 & 1
+\end{pmatrix}
+\]
+
+\item Eliminación Gaussiana en $\mathbb{F}_2$
+
+Aplicamos operaciones elementales de fila utilizando la aritmética binaria (operación XOR):
+
+\begin{enumerate}
+    \item \textbf{Pivote en $(1,1)$:} Tomamos la Fila 1 ($F_1$) como pivote y eliminamos los elementos de la primera columna en $F_2$ y $F_3$ haciendo $F_2 \leftarrow F_2 \oplus F_1$ y $F_3 \leftarrow F_3 \oplus F_1$:
+    \[
+    F_2 \leftarrow (1, 1, 1, 1) \oplus (1, 0, 1, 0) = (0, 1, 0, 1)
+    \]
+    \[
+    F_3 \leftarrow (1, 0, 1, 0) \oplus (1, 0, 1, 0) = (0, 0, 0, 0)
+    \]
+    La matriz se transforma en:
+    \[
+    \begin{pmatrix}
+    1 & 0 & 1 & 0 \\
+    0 & 1 & 0 & 1 \\
+    0 & 0 & 0 & 0 \\
+    0 & 1 & 0 & 1
+    \end{pmatrix}
+    \]
+
+    \item \textbf{Pivote en $(2,2)$:} Tomamos $F_2$ como pivote para eliminar el elemento de la segunda columna en $F_4$ mediante $F_4 \leftarrow F_4 \oplus F_2$:
+    \[
+    F_4 \leftarrow (0, 1, 0, 1) \oplus (0, 1, 0, 1) = (0, 0, 0, 0)
+    \]
+    Obtenemos la forma escalonada final:
+    \[
+    \begin{pmatrix}
+    1 & 0 & 1 & 0 \\
+    0 & 1 & 0 & 1 \\
+    0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0
+    \end{pmatrix}
+    \]
+\end{enumerate}
+
+La presencia de filas nulas revela dependencias lineales. Si asociamos las variables libres $(a_1, a_2, a_3, a_4)$ a cada fila original, el sistema indica que $a_1 \oplus a_3 = 0 \implies a_1 = a_3$. Una solución minimal no trivial es fijar $a_1 = 1$, $a_3 = 1$ y $a_2 = a_4 = 0$. Esto demuestra que las relaciones 1 y 3 son linealmente dependientes módulo 2.
+
+\item Generación del Cuadrado Perfecto y Factorización
+
+Utilizando los índices seleccionados ($1$ y $3$), calculamos los valores de la congruencia cuadrática $X^2 \equiv Y^2 \pmod{N}$:
+
+\begin{enumerate}
+    \item \textbf{Cálculo de $X$:} 
+    \[
+    X = (x_1 \cdot x_3) \pmod{N} = (62 \cdot 71) = 4402 \equiv 1368 \pmod{1517}
+    \]
+    \item \textbf{Cálculo de $Y$:} Multiplicamos los residuos originales correspondientes y extraemos la raíz cuadrada en los enteros:
+    \[
+    Y^2 = 810 \cdot 490 = 396900 \implies Y = \sqrt{396900} = 630
+    \]
+    Reduciendo módulo $N$: $Y = 630 \pmod{1517} = 630$.
+\end{enumerate}
+
+Finalmente, buscamos una base común no trivial mediante el Máximo Común Divisor aplicando el algoritmo de Euclides sobre $\gcd(X - Y, N)$:
+\[
+X - Y = 1368 - 630 = 738
+\]
+\[
+\gcd(738, 1517) = 41
+\]
+
+Dado que $41$ es un divisor propio y no trivial de $1517$, efectuamos la división exacta: $1517 / 41 = 37$. Por lo tanto, se ha logrado la factorización completa del entero de forma exitosa:
+\[
+1517 = 41 \cdot 37
+\]
+\end{enumerate}
+\end{ejemplo}
+
+%=====================================================
+\section{Complejidad}
+%=====================================================
+
+\begin{itemize}
+\item Dixon (1981): primer algoritmo subexponencial probado,
+$L(n) = \exp(\sqrt{2 \ln n \ln \ln n})$.
+\item Criba cuadrática (QS): $\exp(\sqrt{\ln n \ln \ln n})$.
+\end{itemize}
+
+%=====================================================
+\section{Implementación en Python}
+%=====================================================
+
+\subsection{Funciones auxiliares: base de factores y suavidad}
+
+\begin{verbatim}
+import math
+def generar_base_primos_criba(b):
+    """Genera primos pequeños hasta el límite b usando la Criba de Eratóstenes."""
+    if b < 2:
+        return []
+
+    # Inicializar la lista con True (todos son potencialmente primos)
+    criba = [True] * (b + 1)
+
+    # El 0 y el 1 no son primos
+    criba[0] = False
+    criba[1] = False
+
+    for i in range(2, int(math.isqrt(b)) + 1):
+        if criba[i]:
+            # Marcar múltiplos como no primos (compuestos)
+            for j in range(i * i, b + 1, i):
+                criba[j] = False
+
+    return [p for p, es_primo in enumerate(criba) if es_primo]
+
+
+def obtener_exponentes(n, base_primos):
+    """Intenta descomponer 'n' usando eficientemente la base de primos."""
+    exponentes = [0] * len(base_primos)
+    rem = n
+
+    for i, p in enumerate(base_primos):
+        # Optimización: si p^2 > residuo, el remanente no se puede descomponer con la base
+        if p * p > rem and rem > 1:
+            if rem in base_primos:
+                idx = base_primos.index(rem)
+                exponentes[idx] += 1
+                return exponentes
+            else:
+                return None
+
+        while rem % p == 0:
+            exponentes[i] += 1
+            rem //= p
+
+    if rem == 1:
+        return exponentes
+    return None
+
+
+def eliminacion_gaussiana_f2(matriz, filas, columnas):
+    """Efectúa la eliminación gaussiana sobre F_2 mediante operaciones XOR."""
+    m = [fila[:] for fila in matriz]  # Copia profunda de la matriz
+    pivotes = [-1] * columnas
+    fila_actual = 0
+
+    for c in range(columnas):
+        pivot_row = -1
+        for r in range(fila_actual, filas):
+            if m[r][c] == 1:
+                pivot_row = r
+                break
+
+        if pivot_row != -1:
+            # Intercambiar filas
+            m[fila_actual], m[pivot_row] = m[pivot_row], m[fila_actual]
+            pivotes[c] = fila_actual
+
+            # Limpiar columna usando operaciones lógicas XOR
+            for r in range(filas):
+                if r != fila_actual and m[r][c] == 1:
+                    for k in range(columnas):
+                        m[r][k] ^= m[fila_actual][k]
+            fila_actual += 1
+
+    return m, pivotes
+\end{verbatim}
+
+\subsection{El algoritmo de Dixon}
+\begin{verbatim}
+def algoritmo_dixon(N, limite_b=20):
+    """Implementación del Algoritmo de Dixon para factorizar N."""
+    if N % 2 == 0:
+        return 2
+
+    base_primos = generar_base_primos_criba(limite_b)
+    k = len(base_primos)
+
+    x_valores = []
+    matriz_exponentes = []
+    residuos_originales = []
+
+    raiz_n = math.isqrt(N) + 1
+    x = raiz_n
+
+    print(f"[*] Buscando relaciones suaves para N = {N} con Base de Primos: {base_primos}")
+
+    # Recolección de relaciones suaves (necesitamos al menos k + 1)
+    while len(matriz_exponentes) < k + 1:
+        residuo = (x * x) % N
+        exponentes = obtener_exponentes(residuo, base_primos)
+
+        if exponentes is not None:
+            x_valores.append(x)
+            residuos_originales.append(residuo)
+            matriz_exponentes.append([e % 2 for e in exponentes])
+            print(
+                f"  -> Hallada relación suave: {x}^2 == {residuo} (mod {N}) con exp mod 2: {[e % 2 for e in exponentes]}")
+        x += 1
+        if x > N:
+            print("[-] No se encontraron suficientes relaciones. Incrementa el limite_b.")
+            return None
+
+    filas = len(matriz_exponentes)
+    columnas = k
+
+    # Construir la matriz aumentada con la identidad para rastrear combinaciones
+    matriz_aumentada = []
+    for i in range(filas):
+        identidad = [0] * filas
+        identidad[i] = 1
+        matriz_aumentada.append(matriz_exponentes[i] + identidad)
+
+    m_escalonada, pivotes = eliminacion_gaussiana_f2(matriz_aumentada, filas, columnas + filas)
+
+    # Buscar combinaciones en el Kernel (filas que sumen 0 mod 2)
+    for r in range(filas):
+        if sum(m_escalonada[r][:columnas]) == 0:
+            combinacion = [i for i in range(filas) if m_escalonada[r][columnas + i] == 1]
+            if not combinacion:
+                continue
+
+            # Calcular X e Y
+            X = 1
+            Y_cuadrado = 1
+            for idx in combinacion:
+                X = (X * x_valores[idx]) % N
+                Y_cuadrado *= residuos_originales[idx]
+
+            Y = math.isqrt(Y_cuadrado)
+
+            # Comprobación de relación no trivial
+            if (X % N) != (Y % N) and (X % N) != ((-Y) % N):
+                factor = math.gcd(X - Y, N)
+                if 1 < factor < N:
+                    return factor
+
+    print("[-] Se encontraron dependencias, pero todas dieron soluciones triviales.")
+    return None
+
+
+if __name__ == "__main__":
+    # Probando con el número de ejemplo
+    N = 1517
+    factor = algoritmo_dixon(N, limite_b=7)
+
+    if factor:
+        print(f"\n[+] ¡Éxito! Un factor de {N} es {factor}")
+        print(f"[+] Factores primos de {N}: {factor} y {N // factor}")
+    else:
+        print("\n[-] No se pudo factorizar con los parámetros actuales.")
+
+\end{verbatim}
+
+%=====================================================
+\section{Ejercicios}
+%=====================================================
+
+\begin{ejer}
+Ejecuta el código con $n = 23449$, $B = 30$. Verifica que encuentra
+$14526^2 \equiv 5880^2 \pmod{23449}$.
+\end{ejer}
+
+\begin{ejer}
+Modifica el código para imprimir cada relación $B$-suave encontrada
+y comprueba manualmente sus vectores de exponentes.
+\end{ejer}
+
+\begin{ejer}
+Reescribe la recolección de relaciones usando la
+criba cuadrática: en lugar de elegir $z$ al azar, recorre
+$z = \lfloor\sqrt{n}\rfloor + 1, \dots$ y divide $z^2 - n$ entre los
+primos de la base en cuanto sea divisible.
+\end{ejer}
+
+\subsection*{Ventajas que trae el ejercicio 3}
+\subsubsection*{Ventajas de reescriber la recolección de relaciones}
+En la variante estándar del algoritmo de Dixon, la búsqueda de relaciones se realiza seleccionando valores aleatorios o secuenciales de $x$ para evaluar la $B$-suavidad de los residuos directos del cálculo $x^2 \pmod{N}$. El inconveniente principal de esta estrategia radica en que los residuos generados se distribuyen de manera uniforme en todo el intervalo $[1, N-1]$, lo que reduce drásticamente la probabilidad asintótica de encontrar números $B$-suaves a medida que $N$ crece.
+
+Para solventar esta limitación, implementamos la estrategia de recolección determinista basada en la \textbf{Criba Cuadrática}. Definimos un polinomio cuadrático continuo de la forma:
+\[
+Q(z) = z^2 - N
+\]
+donde el recorrido de la variable comienza estrictamente en la cota inferior:
+\[
+z = \lfloor\sqrt{N}\rfloor + 1, \; \lfloor\sqrt{N}\rfloor + 2, \; \dots
+\]
+
+\subsubsection*{Ventajas matemáticas del cambio}
+
+\begin{enumerate}
+    \item \textbf{Reducción del Orden de Magnitud:} Al evaluar valores de $z$ extremadamente cercanos a $\sqrt{N}$, el valor absoluto del polinomio $Q(z)$ satisface la aproximación:
+    \[
+    |Q(z)| \approx 2z\left(z - \sqrt{N}\right) \ll N
+    \]
+    En el ámbito de la teoría analítica de números, los enteros de menor magnitud poseen una densidad y probabilidad exponencialmente más alta de descomponerse por completo sobre una base fija de primos pequeños (teorema de Dickman-de Bruijn).
+    
+    \item \textbf{Validez de la Congruencia Cuadrática:} Dado que por definición del polinomio se cumple que:
+    \[
+    z^2 \equiv Q(z) \pmod{N}
+    \]
+    cualquier producto de relaciones $Q(z_i)$ cuyo vector de exponentes sea par en $\mathbb{F}_2$ preservará de manera idéntica la identidad fundamental de cuadrados:
+    \[
+    X^2 \equiv Y^2 \pmod{N}
+    \]
+    lo cual garantiza que el núcleo de la matriz binaria resuelto mediante la eliminación gaussiana conserve su aplicabilidad directa para hallar los factores no triviales del entero compuesto.
+\end{enumerate}

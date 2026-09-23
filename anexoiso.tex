@@ -1,0 +1,453 @@
+\chapter{Anillos y grupo (multiplicativo y cíclico)}
+\label{anexo:iso}
+
+\section{Grupo y Anillo}
+Se llama grupo al par (G,+) donde \\
+G es un conjunto \\
++ : G X G → G \quad es una ley de composición interna sobre G, asociativa, con neutro e inverso respecto a +. \\
+El orden de un grupo es el número de elementos de G. \\
+Para cada entero $p$ hay un grupo denominado el grupo cíclico de orden p, donde: \\
+G = $Z_p$ = \{ 0, 1, …, (p-1) \} y la operación + es la suma módulo $p$: $i + j = (i + j) \mod p$. \\
+Se llama grupo abeliano a un grupo conmutativo, es decir, a un grupo donde la operación + es conmutativa. \\
+
+Se llama anillo (ring) a una tripleta (R,+,×) donde \\
+(R,+) \quad es un grupo abeliano \\
+× : R X R → R \quad es una ley de composición interna sobre R, asociativa \\
+× es distributiva sobre +:	a × (b + c) = (a × b) + (a × c) \\
+Es usual denominar adición y multiplicación a las operaciones + y ×; y a sus neutros 0 y 1. \\
+
+Si la operación × es conmutativa y tiene neutro se agrega al nombre de anillo: conmutativo, con unidad. \\
+Si además cada elemento distinto del 0 tiene inverso multiplicativo se agrega al nombre de anillo: con división (o cuerpo o campo o field).
+
+\section{Clases de congruencia módulo $n$ y algo de notación}
+Recordemos que la relación de congruencia define una relación de equivalencia, de modo que el conjunto de los enteros $\Z$ queda particionado en clases de equivalencia. \\
+La clase de equivalencia de a es: \\
+$[a]_n = \{ b \in \Z \; / \; a \equiv b \pmod n\} = \{\dots, a - 2n, a - n, a, a + n, a + 2n, \dots \}$ \\
+El conjunto de todas las clases se denota por $\Z/n\Z$ y es $\Z/n\Z = \{[0]_n, [1]_n, ..., [n -1]_n \}$. \\
+ Podemos hacer esta interpretación: tomamos el conjunto de los enteros $\Z$, consideramos los múltiplos de $n$, es decir, $n\Z$ y $\Z/n\Z$ (que suele recibir el nombre de grupo cociente) son los enteros agrupados por su resto módulo $n$. \\
+ Es decir, agrupamos los elementos que difieren en un múltiplo de $n$ en la misma clase de equivalencia. Así, $\Z/n\Z$ es el conjunto de clases de enteros que tienen el mismo resto al dividir por $n$, de modo que dos enteros se identifican si difieren en un múltiplo de $n$. \\
+Es obvio que análoga interpretación reciben $\Z/p\Z$, $\Z/q\Z$, etc. 
+
+\section{Las operaciones}
+Dadas las clases $[a]_n$ y $[b]_n$, que son conjuntos, se define las operaciones suma y producto entre estos conjuntos así: \\
+$[a]_n + [b]_n : = [a + b]_n$ \\
+$[a]_n \cdot [b]_n : = [a \cdot b]_n$ \\
+A diferencia de una operación entre enteros: \\
+$(a+b) \mod n = ( (a \mod n) + (b \mod n) ) \mod n$ \\
+$(a \cdot b) \mod n = ( (a \mod n) \cdot (b \mod n) ) \mod n$ \\
+nótese que la operación módulo está grabada en la identidad misma de la clase al incluirla, por definición, en la congruencia.  \\
+"Reiteramos que las clases son conjuntos. Aún así, es usual trabajar directamente con sus representantes canónicos: el elemento $0$ para la clase $[0]_n$, y así sucesivamente hasta $n-1$ para $[n-1]_n$, identificando por comodidad al conjunto a través de su residuo mínimo no negativo.
+
+\begin{ejemplo}
+Con $a=9, b=11, n=5$. \\
+En los enteros: \\
+$(a+b) \mod n = (9+11) \mod 5 = 20 \mod 5 = ( (9 \mod 5) + (11 \mod 5) ) \mod 5 = ( (4) + (1) ) \mod 5 = 5 \mod 5 = 0$. \\
+En $\Z/n\Z$: \\
+$[a]_n + [b]_n = [9]_5 + [11]_5 = [9 + 11]_5 = [20]_5$ \\
+$= [4]_5 + [1]_5 = [0]_5$. \\
+Note que en la última línea, por comodidad, hemos anotado los representantes canónicos de las clases de equivalencia del 9, 11 y 20.
+\end{ejemplo}
+
+Es usual mostrar que las operaciones están bien definidas. Es decir, que las mismas no dependen de los elementos elegidos.\\
+Suma: \\
+Supongamos que tomamos otros representantes $a' \in [a]_n$ y $b' \in [b]_n$. \\  
+Eso significa: \\
+$a' \equiv a \pmod{n}, \quad b' \equiv b \pmod{n}$. \\
+Entonces:
+$a' = a + kn, \quad b' = b + qn \quad \text{para algunos } k,q \in \Z$. \\
+Sumando:
+$a' + b' = (a+b) + (k+q)n$. \\
+
+Por lo tanto: \\
+$a' + b' \equiv a+b \pmod{n}$. \\
+Esto implica: \\
+$[a'+b'] = [a+b]$. \\
+Producto: \\
+Supongamos que tomamos otros representantes $a' \in [a]_n$ y $b' \in [b]_n$. \\  
+Eso significa: \\
+$a' \equiv a \pmod{n}, \quad b' \equiv b \pmod{n}$. \\
+Entonces:
+$a' = a + kn, \quad b' = b + qn \quad \text{para algunos } k,q \in \Z$. \\
+Efectuando el producto:
+$a'b' = (a+kn)(b+q n) = ab + (aq + bk + knq)n$. \\
+Por lo tanto: \\
+$a' \cdot b' \equiv a \cdot b \pmod{n}$. \\
+Esto implica: \\
+$[a'\cdot b'] = [a \cdot b]$. \\
+Lo que muestra que ambas operaciones están bien definidas.\\
+
+Una vez instituidas las operaciones a través de sus definiciones y mostrado que están bien definidas, ambas expresiones denotan al mismo conjunto, es solo una notación diferente para el mismo objeto. Por lo tanto podemos tratarla como una identidad algebraica: \\
+$[a]_n + [b]_n = [a + b]_n$ \\
+$[a]_n \cdot [b]_n = [a \cdot b]_n$ \\
+El símbolo “=” ya no está introduciendo la definición, sino afirmando que el resultado de aplicar la operación coincide con la clase de equivalencia de la suma (o producto) de representantes. \\
+La definición garantiza que la igualdad siempre se cumple. 
+
+\section{Los anillos}
+$\Z/n\Z$ \textbf{es un anillo} (el anillo de los enteros módulo $n$): \\
+Las operaciones están bien definidas y cumplen los requisitos de anillo.\\
+Neutro aditivo: $[0]_n$, pues $[a]_n + [0]_n = [a+0]_n = [a]_n$. \\
+Inverso aditivo: $[-a]_n$, pues $[a]_n + [-a]_n = [a-a]_n = [0]_n$. \\
+Asociatividad y conmutatividad de la suma: se heredan de los enteros, pues $(a+b)+c = a+(b+c)$ y $a+b = b+a$ en $\Z$, y por lo tanto en las clases. \\
+Neutro multiplicativo: $[1]_n$, pues $[a]_n \cdot [1]_n = [a \cdot 1]_n = [a]_n$. \\
+Asociatividad del producto: se hereda de $\Z$. \\
+Distributividad: se hereda de $\Z$, pues $[a]_n \cdot ([b]_n + [c]_n) = [a]_n \cdot ([b+c]_n) = [a \cdot (b+c)]_n = [(a \cdot b) + (a \cdot c)]_n = [(a \cdot b)]_n + (a \cdot c)]_n =  ([a]_n \cdot [b]_n) + ([a]_n \cdot [c]_n)$. \\
+De igual modo $\Z/p\Z$ y $\Z/q\Z$ son anillos. \\
+
+$\Z/p\Z \times \Z/q\Z$ \textbf{es un anillo}: ($\times$ denota el producto directo o producto cartesiano). \\
+Es decir, los elemento de $\Z/p\Z \times \Z/q\Z$ son pares ordenados ($[a]_p$,$[b]_q$), el primer componente $[a]_p \in \Z/p\Z$, el segundo componente $[b]_q \in \Z/q\Z$ y la suma y producto son componente a componente (o coordenada a coordenada).\\
+Los requisitos (neutros, asociatividad, etc.) se verifican coordenada a coordenada, heredándolos de $\Z/p\Z$ y $\Z/q\Z$. \\
+
+En general, dada la factorización prima $n = p_1^{a_1} p_2^{a_2} \cdots p_k^{a_k}$ \\
+$\Z/p_1^{a_1}\Z \times \dots \times \Z/p_k^{a_k}\Z$ es un anillo.
+
+\section{Homomorfismo e isomorfismo de anillos}
+\textbf{Homomorfismo}: \\
+Dados dos anillos $R$ y $S$, una función $\phi: R \to S$ es un homomorfismo de anillos si respeta ambas operaciones y los neutros multiplicativos: \\
+$\forall a, b \in R \quad \phi (a + b) = \phi(a) + \phi(b)$. \\
+$\forall a, b \in R \quad \phi (a \cdot b) = \phi (a) \cdot \phi (b)$. \\
+$\phi (1_R) = 1_S$. \\
+La estructura algebraica se transporta intacta de R a S.\\
+
+\textbf{Isomomorfismo}:
+Un homomorfismo de anillos $\phi$ es un isomorfismo si además es biyectivo: \\
+Inyectivo: si $\phi (a) = \phi (b)$ entonces $a = b$. No colapsa elementos distintos. \\
+Sobreyectivo: $\forall c \in S \quad \exists a \in R$ tal que $\phi (a) = c$. Cubre todo S. \\
+Un isomorfismo entre $R$ y $S$ se denota por $R \cong S$ y se dice que $R$ y $S$ son isomorfos.
+
+
+\section{Grupo multiplicativo y grupo cíclico}
+$(\Z/n\Z)^{*}$ \textbf{es un grupo} (el grupo \textbf{multiplicativo} de los enteros módulo $n$): \\
+$(\Z/n\Z)^{*} = \{ [a]_n \in \Z/n\Z \;/\; mcd(a,n) = 1\}$.  \\
+Es decir, por el Enunciado~\ref{enun:existInvModular}, se toman sólo los elementos invertibles de $\Z/n\Z$. \\
+Es claro que $(\Z/n\Z)^{*}$ ya no es un anillo pues no es cerrado bajo la suma, pero el producto es asociativo -se hereda de los enteros-, tiene neutro (el $[1]_n$) y todo elemento tiene inverso -por la forma de construirlo-, suficiente para denominarlo grupo. \\
+Básicamente se toman los representantes canónicos que están en el $CRR(n)$, luego el orden del grupo es $\phi (n)$.  \\
+Dado que se denomina unidad a un elemento que tiene inverso multiplicativo, otra forma de describirlo es que $(\Z/n\Z)^{*}$ es el grupo de unidades del anillo $(\Z/n\Z)$. \\
+
+\begin{enunciado}
+$(\Z/n\Z)^{*}$ es cerrado bajo el producto.
+\end{enunciado}
+
+ \begin{proof}
+ Sean $[a]_n,[b]_n \in (\Z/n\Z)^{*}$. \\
+ Por definición,  $[a]_n \cdot [b]_n = [a \cdot b]_n$. \\
+ Por definición, $mcd(a,n)=1$ y $mcd(b,n)=1$. \\
+ Por el Enunciado~\ref{enun:maspropMcd}.iii, $mcd(a \cdot b,n)=1.$
+ \end{proof}
+
+Recordemos que podemos identificar por comodidad la clase a través de su representante canónico.
+Cuando $p$ es primo (impar, para nuestros propósitos), el grupo multiplicativo $(\Z/n\Z)^{*}$ agrega una característica: \\
+Existe al menos un elemento especial (llamado generador o raíz primitiva) que, al elevarlo a potencias sucesivas, produce todos los números del conjunto antes de regresar al $1$. \\
+Cuando ello sucede, recibe el nombre de \textbf{grupo cíclico}. \\
+Aunque no lo haremos, en general se puede probar que, para un grupo cíclico de orden $n$, hay $\phi(\phi(n))$ generadores.
+
+\begin{ejemplo}
+Sea $p=7$.
+Con la operación producto, el grupo cíclico: \\
+$(\Z/7\Z)^{*} = \{ [1]_7,[2]_7,[3]_7,[4]_7,[5]_7,[6]_7 \} = \{ 1,2,3,4,5,6 \}$
+tiene dos generadores, 3 y 5. \\
+$3^1 = 3$ \\
+$3^2 = 9 \equiv 2 \pmod 7$ \\
+$3^3 = 6 \equiv 6 \pmod 7$ \\
+$3^4 = 18 \equiv 4 \pmod 7$ \\
+$3^5 = 12 \equiv 5 \pmod 7$ \\
+$3^6 = 15 \equiv 1 \pmod 7$ 
+\end{ejemplo}
+
+Para cualquier entero $a$ (que no sea múltiplo de $p$, pues en ese caso es congruente con $0$), se llama orden de $a$ al menor entero positivo $d$ tal que: \\
+$a^d \equiv 1 \pmod p$
+En el ejemplo, el orden del generador $3$ es $6$. \\
+El orden de $37$ es $3$, pues $37^1 \mod 7 = 2, 37^2 \mod 7 = 4, 37^3 \mod 7 = 1$. \\
+Si recordamos el pequeño teorema de Fermat, el orden del generador $g$ (que al ser un elemento del grupo es coprimo con $p$) siempre es $p-1$: $g^{p-1} \equiv 1 \pmod p$. \\
+
+Los enunciados de Fermat y Miller-Rabin, entre otros, se basan en la coprimalidad, es decir, en un grupo multiplicativo. \\
+Cuando se apela a generadores, estamos trabajando en un grupo multiplicativo cíclico, por ejemplo cuando se descomponen las condiciones de un mentiroso en un sistema de ecuaciones. \\
+El teorema del resto chino, convertir ecuaciones multiplicativas en lineales y un largo etcétera ponderan la importancia de un grupo multiplicativo (cíclico, si es el caso).
+
+\section{Homomorfismo e isomorfismo de grupos. \\ 
+El isomorfismo de exponenciación discreta}
+Sean $(G,+)$ y $(H,\cdot)$ dos grupos. \\
+Una función $\varphi:G\to H$ es un isomorfismo de grupos si: \\
+1. $\varphi$ es biyectiva. \\
+2. $\varphi(a+b)=\varphi(a)\cdot\varphi(b)$ para todos $a,b\in G$. \\
+
+No es difícil ver que $(\Z/(p-1)\Z,+)$ es un grupo.\\
+$\Z/(p-1)\Z = \{0,...,p-2\}$. También es equivalente usar $\{1,...,p-1\}$. \\
+La operación es la suma módulo $p-1$. \\
+La asociatividad y el neutro se heredan de los enteros. \\
+$-a$ representa el inverso conceptual de la clase cuyo representante es $a$, aunque una forma de dar un representante positivo es decir que el inverso de $a$ es $p-1-a$.\\
+
+Ya vimos que $(\Z/p\Z)^{*}$ es un grupo. \\
+Podemos anotarlo como $(\Z/p\Z,*)$ enfatizando la operación producto.
+
+\begin{enunciado} [El isomorfismo exponencial]\label{enun:isoexpo}\leavevmode\par
+Dado $p$ un primo impar: $(\Z/(p-1)\Z,+) \cong (\Z/p\Z)^{*}$ \\
+Es decir, $(\Z/(p-1)\Z,+)$ es isomorfo a $(\Z/p\Z)^{*}$.
+\end{enunciado}
+
+\begin{proof} \textbf{Parte 1}. \\
+Definimos la función $\varphi : (\Z/(p-1)\Z,+) \to (\Z/p\Z)^{*}$: \\
+$\varphi ([t]_{p-1}) = [g^t]_p$. \\
+Ya advertimos que todo puede hacerse con clases aunque es absolutamente estándar trabajar sólo con los representantes canónicos (los módulos están implícitos): \\
+$\varphi (t) = g^t$. 
+\end{proof}
+
+Se hace un paréntesis en la prueba para dejar sentados algunos apuntes.\\
+La función toma un exponente (al que se eleva el generador de $(\Z/p\Z)^{*}$) y produce un valor en dicho grupo multiplicativo cíclico. \\
+Como $(\Z/p\Z)^{*}$ tiene $p-1$ elementos, se requieren $p-1$ exponentes t distintos tales que $g^t$ obtenga tales elementos. \\
+Es por ello que se trabaja con el grupo $(\Z/(p-1)\Z,+)$, donde están los exponentes. \\
+Con menos exponentes no cubriríamos el orden de $(\Z/p\Z)^{*}$, con más algunos de ellos serían redundantes. \\
+En general, $g^t = g^{(t \mod (p-1))}$. \\
+
+Salvo los múltiplos de $p$, todos los demás enteros $a$ están en alguna clase de $(\Z/p\Z)^{*}$. Que el generador $g$ genere $a$ quiere decir que genera al representante de la clase a la que $a$ pertenece.
+
+\begin{ejemplo} 
+Con $p=7$ el entero $a=5555$ está en la misma clase que el $4$. Luego, con el generador $g=3$, existe un $t$ en $(\Z/(p-1)\Z,+)$ tal que $g^t \equiv 4 \pmod 7$, en efecto, $3^4 \equiv 4 \pmod 7$. \\
+Para cualquier $p$ primo impar: $g^0 \equiv g^{p-1} \equiv 1 \pmod p$. \\
+Con $p=11$ el grupo multiplicativo tiene estos elementos (representantes): $\{1, \dots, 10\}$. \\
+Para generar los enteros $a=10$ y $a=1$ con el generador $g=8$, elegimos un exponente $t$ en $\{0,...,9\}$ o, equivalentemente, en $\{1,...,10\}$: \\
+$8^{5} \equiv 10 \pmod {11}$, $t=5$. \\
+$8^{10} \equiv 1 \pmod {11}$, $t=10$, también sirve $t=0$.
+\end{ejemplo}
+
+Retomamos la prueba.
+
+\begin{proof} \textbf{Parte 2}. \\
+$\varphi$ es un homomorfismo: \\
+$\varphi(t+t') = g^{t+t'} = g^t\cdot g^{t'} = \varphi(t)\cdot\varphi(t')$. \\
+$\varphi$ \textbf{está bien definida}: \\
+Sea $t\equiv t'\pmod {p-1}$. \\
+Entonces por el Enunciado~\ref{enun:congrViaDivisib}, $(p-1) \mid (t-t')$, es decir, $t'=t+(p-1)q$ para algún entero $q$. \\
+Como $g^{p-1} \equiv 1 \pmod p$, se tiene $g^{t'}=g^t \cdot (g^{p-1})^q \equiv g^t\pmod p$. \\
+Es decir, $\varphi(t)$ no depende del representante elegido en $\Z/n\Z$. \\
+$\varphi$ \textbf{es inyectiva}: \\
+Si $\varphi(t)=\varphi(t')$, es decir, $g^t\equiv g^{t'}\pmod p$, entonces $g^{t-t'}\equiv1 \pmod p$. \\
+Por el algoritmo de la división: $t-t' = q(p-1)+r$, con $0 \leq r < (p-1)$. Luego: \\
+$(g^{p-1})^q \cdot g^r \equiv 1 \pmod p$. \\
+Como el orden del generador $g$ es $p-1$ (o por el pequeño teorema de Fermat), resulta: \\
+$g^{p-1} \equiv 1 \pmod p$. \\
+Por el Enunciado~\ref{enun:propCongru}.viii resulta: $g^r \equiv 1 \pmod p$. \\
+Si $r$ fuera positivo, significaría que el orden de g no es $p-1$, por tanto $r=0$. \\
+Entonces, $t-t' = q(p-1)$, es decir, $(p-1) \mid (t-t')$. Por lo tanto: \\ 
+$t \equiv t' \pmod {p-1}$. \\
+Así $\varphi$ no colapsa elementos distintos de $\Z/(p-1)\Z$. \\
+$\varphi$ \textbf{es sobreyectiva}: \\
+$\forall c \in (Z/pZ)^{*}$ existe un exponente $t$ tal $\varphi(t) = g^t = c$. \\
+Es precisamente la definición de generador $g$.
+\end{proof}
+
+Lo que hace $\varphi$ es convertir una suma (del mundo aditivo de exponentes) en un producto (del mundo multiplicativo de residuos).\\
+
+Dado que $\varphi$ está bien definida: $t\equiv t' \pmod {p-1} \implies g^t=g^{t'}$. \\
+Dada la inyectividad de $\varphi$: $g^t=g^{t'} \implies t\equiv t' \pmod {p-1}$. \\
+Lo que nos permite escribir el siguiente enunciado:
+
+\begin{enunciado} [El isomorfismo exponencial de grupos]\label{enun:isoexpo2}\leavevmode\par
+$g^t=g^{t'} \iff t\equiv t' \pmod {p-1}$
+\end{enunciado}
+
+\section{Ecuación lineal en congruencia}
+Sea $x$ la incógnita de la ecuación lineal en congruencia: \\
+$ax \equiv b \pmod {n}$. \\
+Sea $d = mcd(a,n)$. 
+
+\begin{enunciado} [Número de soluciones de una ecuación lineal en congruencia]\label{enun:numsolineal}\leavevmode\par
+$ax \equiv b \pmod {n}$ tiene solución si y solo si $d \mid b$. \\
+En ese caso tiene exactamente $d$ soluciones distintas módulo $n$.
+\end{enunciado}
+
+\begin{proof} \, \\
+$\Rightarrow$) \\
+Supongamos que $x_0$ es solución de $ax\equiv b \pmod n$, es decir: \\
+$ax_0 \equiv b \pmod n$. \\
+Por el Enunciado~\ref{enun:congrViaDivisib}: $n \mid (ax_0-b)$. \\
+Esto significa que existe un entero $q$ tal que
+$ax_0 - b = qn $, es decir, $b = ax_0 - qn$. \\
+Como $d = mcd(a,n)$, es obvio que $d \mid a$ y que $d \mid n$. \\
+Por el Enunciado~\ref{enun:propDivisibilidad}: $d \mid ax_0-qn$. Luego: \\
+$d\mid b$. \\
+$\Leftarrow$) \\
+Supongamos $d\mid b$. \\
+Como $d = mcd(a,n)$, por la identidad de Bezout, Enunciado~\ref{enun:propMcd}.i, existen enteros $u,v$ tales que: \\
+$d = au + nv$. \\
+Como $d\mid b$, entonces $b = dc$ para algún entero $c$. \\
+Multiplicando la identidad de Bezout por $c$: \\
+$b = dc = auc + nvc$. Es decir: \\
+$a(uc) - b = n(-vc)$. Es decir: \\
+$ n \mid a(uc) - b$. Es decir, por el Enunciado~\ref{enun:congrViaDivisib}: \\
+$a(uc)\equiv b\pmod n$.\\
+Por lo tanto, $x=uc$ es una solución explícita. \\
+Se muestra a continuación la forma de las soluciones. \\
+Sea $x_0$ una solución particular (la que se acaba de construir, o cualquier otra). \\
+Cualquier otra solución tiene la forma $x_0 + n'j$ para algún entero $j$, donde $n'=n/d$.\\
+En efecto, sea $x'$ otra solución, así que $ax'\equiv b\equiv ax_0\pmod n$, es decir, por el Enunciado~\ref{enun:propCongru}.i y luego por el Enunciado~\ref{enun:congrEquiv}: \\
+$a(x'-x_0)\equiv 0\pmod n \iff n\mid a(x'-x_0)$. \\
+Como $d = mcd(a,n)$, es obvio que $d \mid a$ y que $d \mid n$. Es decir:\\
+$a=da'$, $n=dn'$ (aquí resulta que $n'=n/d$). \\
+Es claro que $mcd(a',n')=1$, pues si $mcd(a',n')=h$, con $h>1$, como $h \mid a'$ y $h \mid n'$, resulta $a'=hq_1$ y $n'=hq_2$. Sustituyendo, resulta: $a=(dh)q_1$, $n=(dh)q_2$. \\
+Como $h > 1$, entonces $dh > d$. Es decir, hay un divisor común de $a$ y $n$ más grande que $d$. Imposible.  \\
+Entonces la condición $n \mid a(x'-x_0)$ se escribe $dn' \mid da'(x'-x_0) \iff n' \mid a'(x'-x_0)$. \\
+Como $mcd(a',n')=1$, por el lema de Euclides, Enunciado~\ref{enun:propMcd}
+.viii: $n' \mid (x'-x_0)$, 
+es decir, $x' = x_0 + n' j$ para algún entero $j$. \\
+Recíprocamente, cualquier $x'$ de esta forma es solución: \\
+$a(x_0+n'j) = ax_0 + an'j = ax_0 + (da')n' j = ax_0 + a'\,(dn')\,j = ax_0 + a' n j\equiv ax_0\equiv b\pmod n$. \\
+Ahora sí contemos las soluciones distintas módulo $n$. \\
+Las soluciones son $x_0, x_0+n', x_0+2n'$, etc. Es decir, $x_0 + n'j$ para $j \in \Z$. \\
+Cuándo dos de ellas, $x_0+n'j_1$ y $x_0+n'j_2$, son congruentes módulo $n$: \\
+$x_0+n'j_1 \equiv x_0+n'j_2 \pmod n \iff n'j_1 \equiv n'j_2 \pmod n \iff n \mid n'(j_1-j_2)$ \\
+$\iff dn'\mid n'(j_1-j_2) \iff d\mid (j_1-j_2) \iff j_1 \equiv j_2 \pmod d$. \\
+Por lo tanto, reemplazando los valores $j=0,1,2,\dots,d-1$ dan soluciones de la ecuación módulo $n$ todas distintas, pues tomando estos elementos diferentes por pares, ninguno es congruente módulo $d$, pues representan las $d-1$ clases de residuos módulo $d$. \\
+Cualquier otro $j$ es congruente (módulo $d$) a alguno de estos, dando una solución repetida. \\
+Por lo tanto hay exactamente $x_0,\; x_0+n',\; x_0+2n',\;\dots,\; x_0+(d-1)n'$ soluciones distintas módulo $n$, es decir, $d$ soluciones.
+\end{proof}
+
+\section{Anillo de polinomios, divisibilidad y teorema del factor}
+\label{sec:polinomios}
+Sea $R$ un anillo conmutativo con unidad. 
+
+\begin{definicion}[Anillo de polinomios]\label{def:anilloPolinomios}
+El anillo de polinomios denotado por $R[x]$ es el conjunto de todas las expresiones formales $a_0 + a_1x + a_2x^2 + \cdots + a_nx^n$ \\
+donde: \\
+Los coeficientes $a_i$ pertenecen al anillo $R$. \\
+El símbolo $x$ es una indeterminada (no un número fijo). \\
+El grado del polinomio $n$ es finito (cada polinomio tiene un número finito de términos). \\
+\textbf{Operaciones} \\
+En $R[x]$ se definen dos operaciones naturales. \\
+Dados \\
+$f(x) = a_0 + a_1x + a_2x^2 + \cdots + a_nx^n \quad \operatorname{gr}(f)=n$ \\
+$g(x) = b_0 + b_1x + b_2x^2 + \cdots + b_mx^m \quad \operatorname{gr}(g)=m$ \\
+Suma de polinomios (se usa la suma de $R$): \\
+$f(x) + g(x) = (a_0+b_0) + (a_1+b_1)x + (a_2+b_2)x^2 + \cdots + (a_k+b_k)x^k \qquad$ $k = \max(n,m)$ \\
+Si algún índice excede el grado de uno de los polinomios, se toma el coeficiente faltante como 0. \\
+Producto de polinomios (se usa el producto de $R$): \\
+$f(x) \cdot g(x) = c_0 + c_1x + c_2x^2 + \cdots + c_{n+m}x^{n+m} \qquad$ $c_k = \sum_{i+j=k} a_i b_j$ \\
+\end{definicion}
+
+Nótese que la suma es término a término. \\
+Nótese que el producto es distributivo. \\
+Si $R$ es un cuerpo, entonces $R[x]$ no es un cuerpo porque no todos los polinomios tienen inverso. \\
+$R[x]$ es un dominio de integridad,
+
+\begin{definicion}[Dominio de integridad]\label{def:domDeIntegr}
+Un dominio de integridad es un anillo conmutativo con unidad sin divisores de cero, es decir, tiene suma y producto, el producto es conmutativo y existe un elemento neutro multiplicativo $1$. \\
+La condición de no tener divisores de cero es esta: \\  
+Si $a \cdot b = 0$ entonces $a = 0$ o $b = 0$, para cualesquier $a,b$ en el anillo.
+\end{definicion}
+
+En el producto de polinomios, con $a_n \neq 0$ y $b_m \neq 0$, el término de mayor grado de $f(x) \cdot g(x)$ es $a_n b_m x^{n+m}$, como $R$ es un dominio de integridad, $a_n \cdot b_m \neq 0$, por lo tanto el producto no se anula, no hay divisores de cero, \\
+
+En un cuerpo, dado que todo elemento distinto de cero tiene inverso multiplicativo, se puede probar directamente que no hay divisores de cero. \\
+En efecto, supongamos que en un cuerpo hubiera divisores de cero: $a \neq 0, b \neq 0$, pero $a \cdot b = 0$. \\
+Como $a \neq 0$, existe $a^{-1}$. Multiplicando por $a^{-1}$: \\  
+$a^{-1} \cdot (a \cdot b) = a^{-1} \cdot 0$, entonces $(a^{-1} \cdot a) \cdot b = 0$, luego $1 \cdot b = 0$, es decir, $b = 0$. \\
+Lo que contradice que $b \neq 0$, invalida el supuesto y prueba la afirmación. \\
+
+$\Z/8\Z$ (un anillo conmutativo con unidad), por ejemplo, tiene divisores de cero: $2 \cdot 4$. \\
+En efecto, $2 \cdot 4 \bmod 8 = 0$, aún cuando $2 \neq 0$ y $4 \neq 0$. \\
+
+Existe un algoritmo de la división para polinomios.
+
+\begin{enunciado}[Algoritmo de la División de polinomios]\label{enun:algDivisionPol}
+Sea $K$ un cuerpo y $p(x), d(x) \in K[x]$ con $d(x) \neq 0$. Entonces existen polinomios $q(x), r(x) \in K[x]$ tales que: \\
+$p(x) = d(x)q(x) + r(x) \qquad$ $\operatorname{gr}(r) < \operatorname{gr}(d)$ \\
+$q(x)$ y $r(x)$ son únicos y se denominan el cociente y el residuo.
+\end{enunciado}
+
+\begin{proof}
+Existencia \\
+Por inducción sobre $n = \operatorname{gr}(p)$ \\
+Sea $m = \operatorname{gr}(d)$ y $b$ el coeficiente principal de $d(x)$. \\
+Caso base: Sea $\operatorname{gr}(p) < m$. \\
+Tomamos $q(x) = 0$ y $r(x) = p(x)$. Se cumple trivialmente. \\
+Hipótesis inductiva: El enunciado es cierto para $\operatorname{gr}(p) < n$. \\
+Paso inductivo: Supongamos $\operatorname{gr}(p) = n \geq m$. \\
+Sea $a$ el coeficiente principal de $p(x)$. Definimos: $p_1(x) = p(x) - \frac{a}{b} x^{n-m} d(x)$. \\
+Como restamos el término principal, $\operatorname{gr}(p_1) < n$. Por hipótesis inductiva, existen $q_1(x), r(x)$ tales que: $p_1(x) = d(x)q_1(x) + r(x), \quad \operatorname{gr}(r) < m$. \\
+Sustituyendo: \\
+$p(x) - \frac{a}{b} x^{n-m} d(x) = d(x)q_1(x) + r(x)$. \\
+Luego: \\
+$p(x) = d(x) \left(q_1(x) + \frac{a}{b} x^{n-m}\right) + r(x)$. \\
+Es decir: \\
+$p(x) = d(x) \cdot q(x) + r(x) \quad$ donde $q(x) = \left(q_1(x) + \frac{a}{b} x^{n-m}\right)$. \\
+Como $b$ es el coeficiente principal de $d(x)$ y $d(x) \neq 0$, entonces $b \neq 0$. \\
+En el cuerpo $K$ todo elemento no nulo tiene inverso multiplicativo, por lo tanto, existe $b^{-1} \in K$. Luego, $\frac{a}{b} = a \cdot b^{-1} \in K$. \\
+Unicidad \\
+Supongamos dos representaciones: \\
+$p(x) = d(x)q_1(x) + r_1(x) = d(x)q_2(x) + r_2(x)$ \\
+Restando: $d(x)(q_1(x) - q_2(x)) = r_2(x) - r_1(x) \quad$  (lado-izquierdo LI = LD lado-derecho)\\
+Supongamos que $q_1 \neq q_2$. \\
+Entonces $\operatorname{gr}(\text{LI}) \geq \operatorname{gr}(d) = m$. \\
+Pero $\operatorname{gr}(\text{LD}) \leq \max(\operatorname{gr}(r_1), \operatorname{gr}(r_2)) < m$. \\
+Esta contradicción invalida el supuesto, por lo tanto, $q_1 = q_2$, y en consecuencia $r_1 = r_2$.
+\end{proof}
+
+\begin{enunciado}[Teorema del residuo]\label{enun:teoResid}
+Sea $p(x)  \in K[x]$. \\
+Sea $c \in K$. \\
+Si se divide $p(x)$ por el polinomio $(x - c)$ entonces el resto $r(x)$ de dicha división es el elemento constante $r' \in K$ tal que: $r' = p(c)$
+\end{enunciado}
+
+\begin{proof}
+Por el Algoritmo de la División de polinomios, existen únicos polinomios $q(x)$ y $r(x)$ tales que: $p(x) = (x - c) \cdot q(x) + r(x) \quad$ con 
+$\operatorname{gr}(r) < \operatorname{gr}(x - c) \qquad$  \hfill (*) \\
+Es evidente que el grado de $(x - c)$ es $1$. Por lo tanto $r(x)$ es el polinomio constante (de grado 0), es decir, una constante, llamémosla $r'$: $p(x) = (x - c) \cdot q(x) + r'$. \\
+Evaluando (*) en $x = c$ resulta: $p(c) = (c - c) \cdot q(c) + r'$, es decir, $p(c) = r'$.
+\end{proof}
+
+\begin{enunciado}[Teorema del factor]\label{enun:teoFactor}
+Sea $K$ un cuerpo. \\
+Sea $p(x) \in K[x]$. \\
+Para cualquier elemento $c \in K$, se cumple que: $\,(x - c) \mid p(x) \, \iff \, p(c) = 0$, \\
+Es decir, $(x - c)$ es un factor de $p(x)$ si y solo si $c$ es una raíz de $p(x)$.
+\end{enunciado}
+
+\begin{proof}
+Dados los polinomios $p(x), d(x) \in K[x]$, $d(x) \neq 0$, por el Algoritmo de la División para polinomios existen únicos polinomios $q(x), r(x)$ tales que: \\
+$p(x) = d(x) \cdot q(x) + r(x), \quad$ con $\operatorname{gr}(r) < \operatorname{gr}(d)$. \\
+Aplicado a $d(x) = (x - c)$, por el teorema del residuo: \\
+$p(x) = (x - c) \cdot q(x) + r' \quad$ con $r'= p(c)$. \\
+$\Leftarrow$) \\
+Si $p(c) = 0$ entonces $(x - c) \mid p(x)$. \\
+Por hipótesis: $p(c) = 0$. Luego, $r'= 0$. Es decir: \\
+$p(x) = (x - c) \cdot q(x)$. Lo que implica que: \\
+$(x - c) \mid p(x)$. \\
+$\Rightarrow$) \\
+Si $(x - c) \mid p(x)$ entonces $p(c) = 0$. \\
+Por hipótesis: $(x - c) \mid p(x)$. Es decir: $p(x) = (x - c) \cdot q(x)$ \\
+Evaluando en $x = c$: $p(c) = (c - c) \cdot q(c) = 0$. Es decir:\\
+$p(c) = 0$.
+\end{proof}
+
+Nótese que la demostración es la misma para los polinomios con coeficientes en el cuerpo $Z/pZ$ (obviamente las operaciones, igualdades y evaluaciones se entienden módulo $p$).
+
+\begin{enunciado}[Número máximo de raíces]\label{enun:numRaices}
+Sea $K$ un cuerpo. \\
+Todo polinomio no nulo $p(x)\in K[x]$ de grado $n$ tiene a lo sumo $n$ raíces distintas en $K$
+\end{enunciado}
+
+\begin{proof}
+Por inducción sobre $n$. \\
+Caso base: $n=0$ \\
+Un polinomio no nulo de grado $0$ es una constante: $p(x)=c$,\, con $c\neq0$. \\
+Por tanto no tiene raíces, es decir, tiene $0$ raíces: $0 \leq n$. \\
+Hipótesis inductiva: el enunciado es cierto para todo polinomio no nulo de grado $n$. \\
+Paso inductivo: Sea $p(x)$ un polinomio no nulo de grado $n+1$. \\
+Si $p(x)$ no tiene raíces, entonces tiene $0$ raíces, y evidentemente $0\leq n+1$. \\
+Si $p(x)$ tiene alguna raíz $r' \in K$, quiere decir que $p(r')=0$. Por el teorema del factor, $x-r' \mid p(x)$. \\
+Por tanto, existe $g(x) \in K[x]$ tal que $p(x)=(x-r')g(x)$. \\
+Como $\operatorname{gr}(p)=n+1$, se deduce que $\operatorname{gr}(g)=n$, \\
+Todas las demás raíces de $p(x)$, distintas de $r'$, son raíces de $g$. \\
+En efecto, si $s \neq r'$ es otra raíz de $p(x)$, entonces $0=p(s)=(s-r)g(s)$. \\
+Como $K$ es un cuerpo, no tiene divisores de cero. Como $s \neq r'$, $s-r' \neq 0$. \\
+Por tanto necesariamente $g(s)=0$. \\
+Así que: $r'$ es una raíz de $p(x)$; todas las demás raíces de $p(x)$ son raíces de $g(x)$; $g(x)$ tiene grado $n$. \\
+Por la hipótesis inductiva, $g(x$) tiene a lo sumo $n$ raíces. \\
+Por consiguiente, $p(x)$ tiene como máximo $1+n=n+1$ raíces. \\
+Los tres casos demuestran que todo polinomio no nulo de grado $n$ sobre un cuerpo tiene a lo sumo $n$ raíces.
+\end{proof}
+
+Considerando  el polinomio $p(x)=x^2-1$ en el cuerpo $\Z/p\Z$, $p(x)$ tiene a lo sumo $2$ raíces. \\
+Sabemos que $1$ es raíz porque $p(1)=0$. Por el teorema del factor, $x-1 \mid x^2-1$. \\
+De hecho, $x^2-1=(x-1)(x+1)$. \\
+Ya tenemos una raíz $x=1$. La otra es $x=-1$. \\
+Es decir, $p(x)=x^2-1$ tiene exactamente $2$ raíces.

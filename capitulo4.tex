@@ -1,0 +1,800 @@
+\chapter{Algoritmos de Factorización}
+\section{Introducción}
+No es inusual el término \textbf{factorización} para referirse a la descomposición 
+de un número entero positivo $n$ en una multiplicación de factores más simples.
+
+\begin{ejemplo}
+La factorización de $n=72$ es: \\
+$200 = 8 \cdot 9$.
+\end{ejemplo}
+
+También ya hemos llamando factorización a la descomposición de $n$ que contiene
+factores primos duplicados, todavía sin expresar la multiplicidad de dichos factores a través exponentes.
+
+\begin{ejemplo}
+La factorización de $n=72$ es: \\
+$200 = 2 \cdot 2 \cdot 2 \cdot 3 \cdot 3$.
+\end{ejemplo}
+
+Aunque es más propio abreviar con el término factorización, la más estricta definición \ref{def:factorizacion}: factorización prima.
+
+\begin{ejemplo}
+La factorización prima de $n=72$ es: \\
+$n = 72 = 2^3 \cdot 3^2 = p_1^{a_1} p_2^{a_2}$, donde $p_1=2, p_2=3, a_1=3, a_2=2$.
+\end{ejemplo}
+
+Un algoritmo de factorización es la serie de pasos ordenados para hallar dichos factores primos junto a su multiplicidad. \\
+
+Por simplicidad, describiremos lo esencial de los algoritmos, sin embargo, conviene indicar que lo primero que debe verificar un algoritmo es la primalidad de $n$ para no desperdiciar recursos en un número que no es compuesto. \\
+Más aún, en este uso eficiente de los recursos, antes incluso de Miller-Rabin o cualquier algoritmo poderoso de testeo de primalidad, puede ser recomendable efectuar divisiones previas entre los primeros primos pequeños (almacenados en una lista -digamos entre 2 y 1000-) pues un buen porcentaje de los números compuestos aleatorios tienen un factor primo menor a 1000 y una división simple es más rápida que Miller-Rabin. Este testeo de primalidad incluye la detección de si $n=2$ o bien $n>2$ y par. \\
+Se puede asumir entonces que $n$ es impar y compuesto.
+
+\section{Algoritmo por fuerza bruta}
+A semejanza de la división tentativa estándar (trial division), se van probando divisores en secuencia desde 2 hasta $\sqrt{n}$, guardando cada factor primo identificado, junto a su multiplicidad. \\
+Se trabaja con la variable $m=n$ para preservar la variable $n$ y su valor; y con los posibles factores (primos) $d$ empezando en $d=2$. \\
+El Algoritmo~\ref{alg:AlgFactFB} se muestra a continuación.
+
+\begin{lstlisting}[caption={Algoritmo por fuerza bruta}, label={alg:AlgFactFB}, mathescape=true]
+# Entrada: $n$
+# Salida: factorizacion prima de $n$
+
+$i = 0$
+$m = n$
+$d = 2$
+while $d^2 \leq m$:
+      if $d \mid m$:
+            $i = i+1$
+            $p_i = d$
+            $a_i = 0$
+            while $d \mid m$:
+                  $a_i = a_i + 1$
+                  $m = \frac{m}{d}$
+      else:
+            $d = d+1$
+if $m > 1$:
+      $i = i+1$
+      $p_i = m$
+      $a_i =1$
+print($n=p_1,a_1, \dots, p_i,a_i$)
+\end{lstlisting}
+
+Una vez detectado un factor $d$ que divide a $m$ ($d$ hace el papel del primo $p_i$), se abre un bucle que efectúa $m = \frac{m}{d}$ repetidamente, llevando la cuenta de cuántas veces lo logra (multiplicidad $a_i$ de $p_i$), hasta que $d$ deja de dividir agotando su multiplicidad. Sólo entonces se pasa al siguiente candidato $d=d+1$. \\
+El proceso continúa mientras $d^2 \leq m$, es decir, el algoritmo se detiene cuando el candidato a divisor $d$ excede la raíz cuadrada del remanente $m$ sin factorizar. \\
+Nótese que para cada compuesto $d$ y para cada primo que no divide a $n$ (que no sea un factor de $n$), se hace una sola prueba de divisibilidad, que falla, y se avanza. Esto permite no tener una lista previa de primos. \\
+El bucle interno puede agotar por completo el último factor primo de $n$, dejando $m=1$ y la factorización terminada dentro del ciclo principal. \\
+O bien, el ciclo externo termina porque $d^2$ superó a $m$ antes de que $m$ llegue a $1$, ese remanente es primo y se lo registra con multiplicidad 1.
+
+\begin{ejemplo}
+Con $n=m=396$. \\
+Empezando con $d=2$. Como $2 \mid 396$, $p_1=2$ y se activa el ciclo interno; los siguientes valores de $m$ son $198, 99$ y sale de dicho ciclo con $a_1=2$. \\
+$d=d+1=3$. Como $3 \mid 99$, $p_2=3$ y se activa el ciclo interno; los siguientes valores de $m$ son $33,11$ y sale de dicho ciclo con $a_2=2$. \\
+$d=d+1=4$, pero $4^2 \nleq 11$. Sale del ciclo externo antes de que $m$ llegue a $1$. \\
+Ese remanente $m=11$ es primo. La salida final es: \\
+$396=n=p_1^{a_1} \cdot p_2^{a_2} \cdot p_3=2^2 \cdot 3^2 \cdot 11$.
+\end{ejemplo}
+
+Knuth y Rosen \cite{KnuthP76} probaron que el algoritmo tiene una complejidad $O\left(\frac{\sqrt{n}}{\log n}\right)$, que expresado en función del tamaño de la entrada en bits $m = \log n$, se traduce en un crecimiento exponencial $O\left( \frac{2^{m/2}}{m} \right)$.
+
+\section{Método de Fermat}
+\label{sec:metodoDeFermat}
+Bajo el supuesto de que $n$ es un impar compuesto, entonces necesariamente $n=ab$ con $a,b > 1$ impares, pues dos pares multiplicados o un par por un impar resultan en un número par. \\
+Con $a,b$ impares, entonces $a+b$ y $a-b$ son pares y por lo tanto $\frac{a+b}{2}$ y  $\frac{a-b}{2}$ son enteros. \\
+Por lo tanto $n$ se puede expresar siempre como una diferencia de cuadrados: \\
+$n = ab$ \\
+$= (\frac{a^2+2ab+b^2 -a^2+2ab-b^2}{4})$ \\
+$= (\frac{a^2+2ab+b^2}{4}) - (\frac{a^2-2ab+b^2}{4})$ \\
+$= (\frac{a+b}{2})^2 - (\frac{a-b}{2})^2$ \\
+$= c^2 - d^2$. \\
+
+Es decir, siempre sucede que $n=c^2 - d^2$, entonces $d^2 = c^2 - n$. \\
+La búsqueda de dichos números empieza en: $c = \lceil \sqrt{n} \rceil$. \\
+Si $c^2 - n$ es un cuadrado perfecto, ya tenemos el valor para $d$. \\
+En otro caso incrementamos $c=c+1$ y volvemos a probar. \\
+Dado que $n$ siempre es una diferencia de cuadrados, algún momento obtendremos valores correctos tales que $n=c^2 - d^2 = (c+d)(c-d) = ab$.
+
+\begin{ejemplo} \, \\
+\textbf{Sea} $n=5959$. \\
+Empezamos con $c= \lceil \sqrt{n} \rceil = \lceil \sqrt{5959} \rceil = 78$.  \\
+Luego, $c^2 - n = 78^2 - 5959 = 125$, no es un cuadradado perfecto. Incrementamos $c$. \\
+$c=79$. $c^2 - n = 79^2 - 5959 = 282$, no es un cuadradado perfecto. $c=c+1$. \\
+$c=80$. $c^2 - n = 80^2 - 5959 = 441$. Cuadrado perfecto. Luego $d=\sqrt{441}=21$. \\
+$n = 5959 = c^2 - d^2 = (c+d)(c-d) = (80+21)(80-21)=101 \cdot 59$. \\
+\textbf{Sea} $n=25$. \\
+$c= \lceil \sqrt{n} \rceil = \lceil \sqrt{25} \rceil = 5$.  \\
+$c^2 - n = 5^2 - 25 = 0$. Cuadrado perfecto. Luego $d=\sqrt{0}=0$. \\
+$n = 25 = c^2 - d^2 = (c+d)(c-d) = (5+0)(5-0) = 5 \cdot 5$.
+\end{ejemplo}
+
+Nótese que dado que $n=c^2 - d^2$, entonces $c^2 = n + d^2$. \\
+Al buscar factores de un número entero positivo (y como muestra el segundo ejemplo) $d^2 \geq 0$. \\
+Luego: $c^2 \geq n$. \\
+Como $c = \frac{a+b}{2}$, resulta que $c>0$. Es decir: \\
+$c \geq \sqrt n$. \\
+De ahí que empecemos la búsqueda en $c = \lceil \sqrt{n} \rceil$. \\
+
+El Algoritmo~\ref{alg:AlgFactFermat} basado en el método de Fermat se muestra a continuación.
+
+\begin{lstlisting}[caption={Algoritmo de Fermat}, label={alg:AlgFactFermat}, mathescape=true]
+# Entrada: $n$
+# Salida: factorizacion de $n=ab$
+
+$c= \lceil \sqrt{n} \rceil$ 
+$d2 = c^2 - n$
+while $\lfloor \sqrt{d2} \rfloor^2 \neq d2: \qquad$ # d2 no es cuadrado perfecto
+      $c = c + 1$
+      $d2 = c^2 - n$
+$d= \sqrt{d2}$
+$a= c + d$
+$b= c - d$
+print($a$,$b$)
+\end{lstlisting}
+
+Nótese que, en general, se obtienen dos factores no necesariamente primos. \\
+Siendo factores menores que $n$ el trabajo se simplifica y puede recurrirse al mismo método para ambos factores si no son primos. 
+
+\section{Híbrido división tentativa y Fermat}
+Una estrategia combinada consiste en intentar hallar rápidamente factores pequeños a través de la división tentativa, utilizando una lista $L$ de primos hasta un límite dado, por ejemplo $10^4$, obtenida de un repositorio o a través de alguna criba de primalidad. \\
+Si ello falla, pasar a la búsqueda de un factor desde $\sqrt{n}$ a través del método de Fermat. \\
+
+El Algoritmo~\ref{alg:AlgFactHibrido} muestra ello.
+
+\begin{lstlisting}[caption={Algoritmo Híbrido}, label={alg:AlgFactHibrido}, mathescape=true]
+# Entrada: $n$
+# Salida: factorizacion de $n=ab$
+
+$hallado = False$
+obtener $L = [p_1, p_2, \dots, p_{m}]$
+for $p_i \in L$:
+    if $p_i \mid n$:
+        print($p_i$,$n/p_i$)
+if $not(hallado)$:  
+     $c = \lceil \sqrt{n} \rceil $
+     $d2 = c^2 - n$
+     while $\lfloor \sqrt{d2} \rfloor^2 \neq d2: \qquad$ # d2 no es cuadrado perfecto
+         $c = c + 1$
+         $d2 = c^2 - n$
+         $d= \sqrt{d2}$
+         print($c+d$,$c-d$)
+\end{lstlisting}
+
+\section{Algoritmo Rho de Pollard}
+John Pollard, el autor, describió una parte del mismo como una cola seguida de un ciclo, que claramente evoca la letra griega $\rho$. No es infrecuente la denominación algoritmo Pollard Rho. \\
+
+Se recomienda una lectura minuciosa del Anexo~\ref{anexo:iso} y la Sección~\ref{sec:Pollard}. \\
+Resumiendo, el uso de la función $f(x) = x^2 \mod n$ (una genialidad de Pollard) nos permite, en base a las ideas de Floyd, generar pares $x,y$ en base a dos secuencias $x_i$, $y_j$ donde $y_j$ es la subsecuencia $x_{2i}$ de la primera, empezando por una semilla $x_0=y_0$.\\
+Estos pares en principio no son congruentes módulo $n$ pero sí son congruentes módulo $p$ (donde $p < n$ es un factor de $n$). Ello implica que el $mcd(|x-y|,n)$ es un factor de $n$. \\
+Un valor $c=0$ tiende a producir ciclos demasiado simples. \\
+Una semilla $x_0<2$ puede producir secuencias que degeneran. \\
+El Algoritmo~\ref{alg:AlgPollard} integra todas esas ideas.
+
+\begin{lstlisting}[caption={Algoritmo Rho de Pollard}, label={alg:AlgPollard}, mathescape=true]
+# Entrada: $n$ impar y compuesto
+# Salida: $\;d$ un factor no trivial de $n$
+
+Elegir al azar la semilla $x \in \{2, …, n-1\}$  
+y = x
+Elegir $c>0 \qquad$   # ctte de la funcion, preferible un valor menor
+Definir $f(x) = (x^2 + c) \mod n$
+$x = f(x)$
+$y = f(f(y))$
+$d = mcd(|x - y|,n)$
+if $d = 1$:
+    volver a 8
+if $d = n$:
+     volver a 4 $\qquad$  # reiniciar constante o semilla
+print($d$) $\qquad\qquad\qquad$ # factor no trivial $1<d<n$ hallado
+\end{lstlisting}
+
+\begin{ejemplo}
+Sea $n=25$. \\
+Con $f(x) = (x^2 + 1) \mod 25$ y semilla $x_0=y_0=2$, se tiene: \\
+Obviamos el cálculo $x,y=x_0,y_0$ pues el $mcd=n$. \\
+$x_1=2^2+1 \mod 25 =5$, $y_1=5^2+1 \mod 25 =1$, $mcd(|5 - 1|,25)=1$. \\
+$x_2=5^2+1 \mod 25 =1$, $y_2=2^2+1 \mod 25 =5$, $mcd(|1 - 5|,25) = 1$. \\
+$x_3=1^2+1 \mod 25 =2$, $y_3=1^2+1 \mod 25 =2$, $mcd(|2 - 2|,25) = 25 = n$. \\
+Por alguno de los motivos que se comentan luego de los ejemplos (límite de iteraciones superado, $mcd=n$, timeout, etc.), el algoritmo cambia de constante $c$ y semilla. \\
+Con $f(x) = (x^2 + 2) \mod 25$ y semilla $x_0=y_0=3$, se tiene: \\
+Obviamos el cálculo $x,y=x_0,y_0$ pues el $mcd=n$. \\
+$x_1=3^2+2 \mod 25 =11$, $y_1=11^2+2 \mod 25 =23$, $mcd(|11 - 23|,25)=1$. \\
+$x_2=11^2+2 \mod 25 =23$, $y_2=6^2+2 \mod 25 =13$, $mcd(|23 - 13|,25)=5=d$. \\
+$1<d<n$, factor 5 hallado. \\
+Sea $n=2173$. \\
+Con $f(x) = (x^2 + 3) \mod 2173$ y semilla $x_0=y_0=3$, la secuencia es \\
+Obviamos el cálculo $x,y=x_0,y_0$ pues el $mcd=n$. \\
+$x_1=3^2+3 \mod 2173 =12$, $y_1=12^2+3 \mod 2173 =147$, $mcd(|12 - 147|,2173)=1$. \\
+$x_2=12^2+3 \mod 2173 =147$, $y_2=2055^2+3 \mod 2173 =889$, $mcd(|147 - 889|,2173)=53=d$. \\
+$1<d<n$, factor 53 hallado. 
+\end{ejemplo}
+
+Como muestran los Enunciados~\ref{enun:Rhomcd1} y ~\ref{enun:Rhomcd2}, para $d=mcd(|x-y|,n)$, $d=1$ o $d=n$ no son buenas noticias. \\
+Cuando $d=1$, x,y no son congruentes módulo $p$, no hay factor. \\
+Cuando $d=n$, x,y sí son congruentes módulo $n$, no hay factor propio. \\
+De modo que el algoritmo puede hallar nada por estas razones y otras inherentes a la constante $c$ o la semilla: la colisión útil no ocurre pronto, la secuencia entra en un ciclo corto inútil, el polinomio elegido es malo para $n$, la semilla es mala, que el factor buscado sea demasiado grande y el costo sea prohibitivo. \\
+De modo que lo que se hace en la práctica es, dada la semilla $x_0$ y un valor para la constante $c$, se van probando pares (x,y) según la función $f$. \\
+En el algoritmo, el paso 12 (volver a 8), no puede darse infinitamente, debe ponerse un límite y cambiar de semilla. \\
+El paso 14 (volver a 4) obliga a cambiar la constante $c$ de la función $f$. \\
+Sin embargo, es casi un estándar cambiar semilla y constante a la vez en medio de un conjunto de salvaguardas: límite de iteraciones, cambio de semilla, cambio de constante $c$, reinicios, timeout, uso de varias funciones, paralelización, etc. \\
+
+Aún así, no se garantiza que el algoritmo vaya a encontrar el factor inexorablemente, no existe un enunciado que diga que el algoritmo termina con éxito. Puede fallar incluso cambiando de semilla o reiniciando la constante de la función. \\
+El algoritmo es heurístico/probabilístico, no un algoritmo determinista con prueba de terminación para cualquier entrada. \\
+El riesgo no es equivocarse, el riesgo es encontrar nada.
+Al mismo tiempo esa es una característica positiva, el algoritmo no miente, si no encuentra un factor, devuelve nada.
+
+\section{Algoritmos con cribas}
+\subsection{Algoritmo de factorización utilizando la criba de Gries y Misra}
+En la Subsección~\ref{sec:Gries} se describe esta criba junto a su algoritmo. \\
+Para un impar compuesto $n$ se trabaja con una lista de primos y una lista del menor factor primo (mfp) para los enteros entre 2 y $n$ (entre paréntesis para diferenciarla). \\
+Por claridad se añade la lista de los números hasta $n$, aunque no es necesario. \\ 
+Tmabién para facilitar la lectura se incluyen las posiciones 0 y 1 en cada lista, pero las ignoramos con un guión bajo “\_”.
+
+\begin{ejemplo}
+Sea $n=15$. \\
+A continuación se muestra: \\
+La lista L1 de enteros hasta $n$. \\
+La lista L2 del menor factor primo (mfp). \\
+La lista L3 de primos hallados según el algoritmo de Gries y Misra. \\
+L1 = \{\_, \_, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15\} \\ 
+L2 = (\_, \_, 2, 3, 2, 5, 2, 7, 2, 3,  02, 11, 02, 13, 02, 03) \\ 
+L3 =  \{\_, \_,2,3,5,7,11,13\}
+\end{ejemplo}
+
+Reiterando lo que se dijo entonces, cada compuesto tiene asociado su menor factor primo, por lo tanto su factorización se convierte en un rastreo lineal y determinista con divisiones predichas. \\
+En el ejemplo, 15 es compuesto y su menor factor primo es 3 (ya tenemos un factor), como el cociente 15/3 = 5, se rastrea 5 y como su menor factor primo es él mismo entonces 5 es primo, lo que termina el rastreo. \\
+Luego 15 = 3 $\cdot$ 5.
+
+\subsection{Algoritmo de factorización utilizando la criba de Eratóstenes}
+En la Subsección~\ref{subsec:Eratostenes} se describe esta criba junto a su algoritmo. \\
+Ahí se muestra que basta con ir hasta $\sqrt n$ en la búsqueda de los primos $p$ y que el marcado o tachado de múltiplos de $p$ puede empezar en $p^2$. \\
+Para la factorización, se hace el siguiente refinamiento: \\
+La lista de primos utilizará 1 a manera de $True$. \\
+En lugar de marcar lo números como no primos con 0 (a manera de $False$) se registra el primo del cual es múltiplo. \\
+De modo que la lista de primos tiene este doble uso: 1 si un número es primo y un factor de $n$ si es compuesto. \\
+Excepcionalmente para los enteros 0 y 1 contiene 0, pero son números que ignoramos. \\
+Debido al límite  $\sqrt n$ y el inicio del marcado en $p^2$, los números compuestos no tienen en la lista su factor más pequeño ni su factor más grande, sino el factor que se adecúe a estas dos condiciones. \\
+Se puede, con un if adicional, ver si un número ya tiene un factor primo asignado (el menor) para no reescribirlo pero, suponiendo que dicho if adicional toma un tiempo de ejecución, prescindiremos de él. \\
+
+Se considera $n$ compuesto e impar, pues su primalidad o su paridad se suponen testeadas previamente.
+
+\begin{lstlisting}[caption={Factorización vía criba de Eratóstenes}, label={alg:AlgCribaErat}, mathescape=true]
+Entrada: n compuesto e impar
+Salida: Lista de enteros hasta $n$ conteniendo un factor de $n$ 
+        o $n$ mismo si es primo
+
+n = 27                        # solo es un ej. puede cambiarse
+Lista_primos = [True,$\dots$,True]   # lista de n elementos $1$
+Lista_primos[0] = Lista_primos[1] = 0 
+p = 2
+while p $\leq \sqrt n$:
+    if Lista_primos[p] = $1$:
+        # marcamos los multiplos de $p$ desde $p^2$
+        for i = $p^2$ hasta $n$ step $p$:
+            Lista_primos[i] = p
+    p = p+1
+\end{lstlisting}
+
+Ahora se tiene \textit{Lista\_primos} que contiene en cada posición $i$ el valor $1$ si $i$ es primo, o bien un factor de $i$. 
+
+\begin{ejemplo} \, \\
+Sea $n = 42$. \\
+Las posiciones 40, 41 y 42 de la lista luego de completar el algoritmo son estas: \\
+$\left[ \dots 5, 1, 3 \right]$ \\
+Nótese que en la posición del número 42, el factor calculado es 3 (los factores de 42 son 2, 3 y 7), de modo que no está ni el menor ni el mayor factor. Eso es porque cuando se trabaja con el primo $p=3$ se empieza a marcar sus múltiplos desde $3^2=9$ y eso cubre al 42. No se llega a trabajar con el primo 7 pues $7 > \sqrt42$, fuera del rango; como ya tiene un 1 de entrada se considera primo; sus múltiplos 14, 21, 28, 35 se marcan al trabajar con los primos 2, 3 y 5. \\
+Sea $n = 27$. \\
+La lista de partida y la lista luego de completar el algoritmo son estas: \\
+$\left[0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 \right]$ \\
+$\left[0, 0, 1, 1, 2, 1, 2, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 1, 3, 1, 2, 3, 2, 1, 3, 5, 2, 3 \right]$ 
+\end{ejemplo}
+
+Con esta criba modificada se puede factorizar $n$ o cualquier otro número menor o igual a $n$ con un rastreo. 
+
+\begin{ejemplo}
+Suponga que quiere factorizar el numero $24$. \\
+En la posición 24 se tiene el 3. Con lo que se tiene el primer factor. \\
+Se divide $n$ por 3 y el resultado es 8. La posición 8 tiene un 2. Segundo factor. \\
+Continuando, $8/2=4$ la posición 4 tiene 2. Tercer factor. \\
+Ahora $4/2 = 2$. Otro factor. \\
+Finalmente el ultimo factor $2/2=1$. Con lo cual finaliza. \\
+De esto se tiene la factorización completa $n = 24 = 3 \cdot 2\cdot2\cdot2=3\cdot2^3$.
+\end{ejemplo}
+
+El rastreo puede verse como un subalgoritmo que va al final del anterior. Así: 
+
+\begin{lstlisting}[caption={Rastreo}, mathescape=true]
+factores =[]
+while $n > 1$:
+   $p$ = Lista_primos[$n$]  
+   if $p$ = 1:
+       $p$ = $n$
+   agregar $p$ a factores
+   $n = n / p$
+\end{lstlisting}
+
+\subsection{Criba cuadrática}
+\label{subsec:cuadratica}
+Para una comprensión cabal de esta parte, es imprescindible repasar el Capítulo~\ref{capitulo:cap1}, en particular la Subsección~\ref{subsec:Fundcuadratica}. \\
+
+En la Sección~\ref{sec:metodoDeFermat} del método de Fermat se muestra que cualquier $n$ impar y compuesto se puede representar como una diferencia de cuadrados. \\
+Para hallar un factor, Fermat busca escribir $n=c^2 - d^2$. \\
+Partiendo de un posible $c$, lo va ajustando para deducir $d$. 
+
+\begin{ejemplo}
+$n = 15347 = 126^2 - 23^2 = (126+23)(126-23) = 149 \cdot 103$. \\
+Un factor es $c+d$, $149$ en este caso.
+\end{ejemplo}
+
+En cambio, la criba cuadrática busca enteros $x,y$ con los cuales representar una diferencia de cuadrados que eventualmente sea un múltiplo de $n$, es decir: $n \mid x^2 - y^2$, que por el Enunciado~\ref{enun:congrViaDivisib} se puede escribir como: $x^2 \equiv y^2 \pmod n$. \\
+Para obtener un factor útil, se añade la condición: $x \nequiv \pm y \pmod n$. \\
+Ello está fundamentado en el Enunciado~\ref{enun:PpioGeneral}.
+
+\begin{ejemplo} \, \\
+Sea $n=15347$. \\
+$3070860^2 \equiv 22678^2 \pmod {15347}$. \\
+Pues $3070860^2 \bmod 15347 = 13714$ y $22678^2 \bmod 15347 = 13714$. \\
+Además $3070860 \nequiv \pm 22678 \pmod {15347}$. \\
+$3070860^2 - 22678^2 = 9429666847916$. \\
+En efecto, $15347 \mid 9429666847916$, pues $9429666847916/15347 = 614430628$. \\
+\end{ejemplo}
+
+Como $x^2 - y^2 = (x+y)(x-y)$, el método halla un factor de $n$ obteniendo $mcd(x-y,n)$.
+
+\begin{ejemplo}  \, \\
+Sea $n=15347$. \\
+Como $3070860^2 - 22678^2 = (3070860 + 22678)(3070860 - 22678)$, se halla: \\
+$mcd(3070860 - 22678,15347) =  mcd(3048182,15347) = 103$. \\
+Siendo 103 un factor de $n$.
+\end{ejemplo}
+
+Si se cumplen las condiciones del Enunciado~\ref{enun:PpioGeneral}, se obtiene un factor no trivial, como se demuestra en dicho enunciado. \\
+En cambio, si $x \equiv \pm y \pmod n$, los Enunciados~\ref{enun:congrEsteril}, ~\ref{enun:congrEsteril2} y ~\ref{enun:congrEsteril3} muestran que sólo se obtiene un factor trivial.
+
+\begin{ejemplo} \, \\
+Sea $n=15347$. \\
+Con $x=386928360$, $y=521594$, es evidente que: $x^2 \equiv y^2 \pmod n$. \\
+En efecto, $386928360^2 \equiv 521594^2 \pmod {15347}$, pues: \\
+$386928360^2 \bmod 15347 = 149713555772289600 \bmod 15347 = 10922$. \\
+$521594^2 \bmod 15347 = 272060300836 \bmod 15347 = 10922$. \\
+Pero  $x \equiv y \pmod n$. En efecto: \\
+$386928360 \equiv 521594 \pmod {15347}$, pues: \\
+$386928360 \bmod 15347 = 15143$. \\
+$521594 \bmod 15347 = 15143$. \\
+$mcd(x-y,n) = mcd(386928360-521594,15347) = mcd(386406766,15347) = 15347$, que es un factor trivial de $n$. 
+\end{ejemplo}
+
+El algoritmo resultante, no verifica directamente si $x \equiv \pm y \pmod n$, lo hace indirectamente en el cálculo del $mcd$ cuando obtiene $n$ o $1$. \\
+Nótese que los enunciados mencionados en el caso de la ocurrencia de estos factores triviales, apelan al hecho de que se verifique que ningún primo de $B$ divide a $n$. \\
+Ello se da por hecho, es decir, dado $n$, un preprocesamiento verifica que ni es primo ni es par, de modo que es compuesto e impar.\\
+Para el caso de esta criba, además se añade a este preprocesamiento una división por tentativa (trial division) de $n$  contra todos los primos de la base $B$: si alguna división fuera exitosa, se habría encontrado un factor de $n$  y el problema se resuelve y reduce inmediatamente. \\
+
+Cómo hallar tales $x,y$ para la diferencia de cuadrados $x^2 - y^2$ es lo interesante y lo que le da el nombre al método. \\
+
+Se trabaja con una base $B$ de primos $p$.
+
+Se buscan y eligen enteros $x$ en base a: \\
+$Q(x) = x^2 - n$ \\
+Con la idea de que $Q(x)$ sea factorizable (rápidamente) con los primos de la base $B$, es decir, que $Q(x)$ sea $B$-suave. 
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. \\
+Sea la base $B = \{ 2,3,5,7,11 \}$. \\
+Con $x=52: Q(x)=52^2 - 2641=2704 - 2641=63=3^2\cdot 7$ \\
+Con $x=53: Q(x)=53^2 - 2641=2809 - 2641=168=2^3\cdot 3\cdot 7$ \\
+Con $x=55: Q(x)=55^2 - 2641=3025 - 2641=384=2^7\cdot 3$ \\
+Nótese que, para los anteriores $x$, sus correspondientes $Q(x)$ tienen $B$-suavidad. Pero: \\
+Con $x=57: Q(x)=57^2 - 2641=3249 - 2641=608=2^5 \cdot 19$ no es $B$-suave pues $19$ no está en la base $B$.
+\end{ejemplo}
+
+Se puede escribir la factorización prima de $Q(x)$ como un vector donde cada componente corresponde a los exponentes de los primos de la base $B$.
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. \\
+Sea la base $B = \{ 2,3,5,7,11 \}$. \\
+Con $x=52: Q(x)=3^2\cdot 7$, vector de la factorización: (0,2,0,1,0). \\
+Con $x=53: Q(x)=2^3\cdot 3\cdot 7$, vector de la factorización: (3,1,0,1,0). \\
+Con $x=55: Q(x)==2^7\cdot 3$, vector de la factorización: (7,1,0,0,0). 
+\end{ejemplo}
+
+Dado que tenemos en la mira cuadrados, nos interesa si el exponente de un factor primo para $n$ puede expresarse como un cuadrado, por ello se puede modificar esta representación vectorial colocando en cada componente el exponente módulo 2.
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. \\
+Sea la base $B = \{ 2,3,5,7,11 \}$. \\
+Con $x=52: Q(x)=3^2\cdot 7$, vector de la factorización módulo 2: (0,0,0,1,0). \\
+Con $x=53: Q(x)=2^3\cdot 3\cdot 7$, vector de la factorización módulo 2: (1,1,0,1,0). \\
+Con $x=55: Q(x)==2^7\cdot 3$, vector de la factorización módulo 2: (1,1,0,0,0). 
+\end{ejemplo}
+
+Como también se contemplan valores negativos para $x$, es usual incluir un componente adicional en los vectores de la factorización (al principio), denotando la presencia o no del signo negativo. \\
+La convención del $-1$ puede representarse formalmente así: $B' = \{-1\} \cup B$.
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. \\
+Sea la base $B = \{ 2,3,5,7,11 \}$. $B' = \{ -1,2,3,5,7,11 \}$. \\
+Con $x=-46: Q(x)=-525=-1 \cdot 3 \cdot 5^2\cdot 7$, en vez de (0,1,0,1,0), el vector de la factorización módulo 2, es este: (1,0,1,0,1,0). \\
+El primer componente con 1 representa el $-1$, es decir, el carácter negativo de la factorización, el segundo componente representa al primo 2, el tercero al primo 5, etc.
+\end{ejemplo}
+
+El objetivo es tener una serie de valores $x$ tales que su producto se exprese como un cuadrado y el producto de sus correspondientes valores $Q(x)$ también se exprese como un cuadrado. \\
+
+Sean dos enteros $x_i, x_j$. Como: \\
+$Q(x_i) = x_i^2 - n$ \\
+$Q(x_j) = x_j^2 - n$ \\
+Entonces: \\
+$x_i^2 - Q(x_i) = n$ \\
+$x_j^2 - Q(x_j) = n$. \\
+Por lo tanto, $n \mid x_i^2 - Q(x_i)\,$ y  $\, n \mid x_j^2 - Q(x_j)$.  \\
+Por el  Enunciado~\ref{enun:congrViaDivisib}: \\
+$x_i^2 \equiv Q(x_i) \pmod n$ \\
+$x_j^2 \equiv Q(x_j) \pmod n$ \\
+Por el Enunciado~\ref{enun:propCongru}.iv: \\
+$x_i^2 x_j^2 \equiv Q(x_i)Q(x_j) \pmod n$ \\
+Que se puede reescribir como: \\
+$(x_i x_j)^2 \equiv Q(x_i)Q(x_j) \pmod n$ \\
+
+Cuando tomamos más enteros se generaliza así: \\ 
+$\Big(\prod x_k\Big)^2 \equiv \prod Q(x_k) \pmod n $ \\
+
+Si se logra escribir el producto de los $Q(x_k)$ para los enteros $x_k$ elegidos como un cuadrado: $y^2=\Big(\prod Q(x_k)\Big)$. \\
+Y se denomina $x=\Big( \prod x_k\Big)$, tenemos la diferencia de cuadrados buscada, escrita como una congruencia: \\
+$x^2 \equiv y^2 \pmod n$.
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. Sea la base $B = \{ 2,3,5,7,11 \}$. \\
+Elegimos: \\
+$x_1=52: Q(x_1)=3^2\cdot 7$, vector de la factorización módulo 2: (0,0,0,1,0). \\
+$x_2=53: Q(x_2)=2^3\cdot 3\cdot 7$, vector de la factorización módulo 2: (1,1,0,1,0). \\
+$x_3=55: Q(x_3)=2^7\cdot 3$, vector de la factorización módulo 2: (1,1,0,0,0). \\
+Sea $x=\Big( \prod x_k\Big)=x_1 \cdot x_2 \cdot x_3 = 52\cdot53\cdot55$. \\
+Luego: $x_1^2 \cdot x_2^2 \cdot x_3^2 = 52^2\cdot53^2\cdot55^2=(52\cdot53\cdot55)^2=x^2$. \\
+Además: \\
+$\Big(\prod Q(x_k)\Big)=Q(x_1)Q(x_2)Q(x_3) = (3^2\cdot 7)(2^3\cdot 3\cdot 7)(2^7\cdot 3)=2^{10}\cdot 3^4 \cdot 7^2 = (2^5 \cdot 3^2 \cdot 7)^2=y^2$. \\
+Luego: \\
+$(52\cdot53\cdot55)^2 \equiv (2^5 \cdot 3^2 \cdot 7)^2 \pmod {2641}$. \\
+Es decir: \\
+$151580^2 \equiv 2016^2 \pmod {2641}$. \\
+Ya se dijo que, como $x^2 - y^2 = (x+y)(x-y)$, el método halla un factor de $n$ obteniendo $mcd(x-y,n)$. \\
+$mcd(151580-2016,2641)=mcd(149564,2641)=139$. \\
+De modo que $139$ es un factor de $2641$. \\
+En efecto $2641 = 19 \cdot 139$.
+\end{ejemplo}
+
+Dado $n$ y definida una base $B$, la idea es buscar valores $x_k$ tales que los $Q(x_k)$ tengan $B$-suavidad. Y elegir algunos de ellos de modo que su producto sea un cuadrado. \\
+
+Por razones que explicaremos más adelante es teóricamente válido buscar los enteros $x_k$ alrededor de $\sqrt n$. 
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. \\
+Buscamos los enteros alrededor de $\sqrt{2641} \approx 51$.
+\end{ejemplo}
+
+Si tenemos muchos $Q(x_k)$ con $B$-suavidad: ¿Cuáles elegimos de modo que se cumpla la meta de que su producto sea un cuadrado? \\
+Ahí es donde entran los vectores de la factorización módulo 2. 
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. Sea la base $B = \{ 2,3,5,7,11 \}$. Tenemos: \\
+$x_1=52: Q(x_1)=3^2\cdot 7$, vector de la factorización módulo 2: (0,0,0,1,0). \\
+$x_3=55: Q(x_3)=2^7\cdot 3$, vector de la factorización módulo 2: (1,1,0,0,0). \\
+(0,0,0,1,0) representa la paridad de los exponentes en la factorización de $Q(x_1)=3^2\cdot 7$. \\
+(1,1,0,0,0) representa la paridad de los exponentes en la factorización de $Q(x_3)=2^7 \cdot 3$. \\
+El producto $Q(x_1)Q(x_3) = (3^2 \cdot 7)(2^7 \cdot 3)=2^7\cdot 3^4 \cdot 7$. \\
+Ni el factor $2$ ni el factor $7$ tienen exponentes pares, lo que imposibilita expresar el producto de los $Q(x_k)$ seleccionados, $Q(x_1)$ y $Q(x_3)$, como un cuadrado. \\
+Note que la suma XOR de los vectores mencionados no devuelve un vector de ceros: \\
+(0,0,0,1,0) + \\
+(1,1,0,0,0) \\
+-------------- \\
+(1,1,0,1,0) \\
+\end{ejemplo}
+
+Ello se refleja de otro modo con ayuda del álgebra lineal: \\
+Es preciso elegir enteros $x_k$ de modo que el conjunto resultante de los vectores módulo 2 de la factorización de los $Q(x_k)$ sea linealmente dependiente. \\
+Tomando en cuenta sólo \{0,1\} como el conjunto de escalares de la combinación lineal resultante, podemos traducir ello así: se requiere que la suma XOR de los vectores del conjunto elegido sea un vector de ceros (para que todos los exponentes sean pares). \\
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. Sea la base $B = \{ 2,3,5,7,11 \}$. \\
+Tenemos: \\
+$x_1=52: Q(x_1)=3^2\cdot 7$, vector de la factorización módulo 2: (0,0,0,1,0). \\
+$x_2=53: Q(x_2)=2^3\cdot 3\cdot 7$, vector de la factorización módulo 2: (1,1,0,1,0). \\
+$x_3=55: Q(x_3)=2^7\cdot 3$, vector de la factorización módulo 2: (1,1,0,0,0). \\
+(0,0,0,1,0), (1,1,0,1,0) y (1,1,0,0,0) representan la paridad de los exponentes en la factorización de $Q(x_1)$, $Q(x_2)$ y $Q(x_3)$. \\
+Ya vimos que el producto $Q(x_1)Q(x_2)Q(x_3)$ se puede expresar como un cuadrado. \\
+Note que la suma XOR de los vectores mencionados sí devuelve un vector de ceros: \\
+(0,0,0,1,0) \\
+(1,1,0,1,0) \\
+(1,1,0,0,0) \\
+-------------- \\
+(0,0,0,0,0) 
+\end{ejemplo}
+
+Dejando de lado la eventualidad del signo negativo que deriva en un componente adicional en los vectores, sea $m=|B|$ el número de elementos de la base $B$ de primos. \\
+Luego, los vectores módulo 2 de la factorización de $Q(x_k)$ tienen $m$ componentes. \\
+
+Si consideramos más de $m$ enteros $Q(x_k)$ con $B$-suavidad y trabajamos (como es en realidad) en el espacio vectorial $F_2^m$ (vectores de dimensión $m$ y operaciones módulo 2), dado que sólo hay $m$ elementos en la base $B$, hay una dependencia lineal. \\
+Ello es así, porque los números primos se tratan también como vectores de dimensión $m$ donde interesa el valor de los exponentes módulo 2 en su factorización prima. Cada primo $p_i$ representa una coordenada única (un eje del espacio), lo que genera automáticamente una base canónica de vectores unitarios, la cual siempre es linealmente independiente. \\
+
+Colocando los vectores correspondientes a $Q(x_k)$ en una matriz aumentada con la identidad, aplicando eliminación gaussiana sobre $F_2$, la matriz aumentada nos dice cuáles $x_k$ deben elegirse de modo que en el producto de los $Q(x_k)$ los exponentes de los primos de $B$ sean todos pares. 
+
+\begin{ejemplo} \, \\
+Sea $n = 2641$. \\
+Sea la base $B = \{2, 3, 5, 7, 11\}$. \\
+Se obtuvieron estos enteros $Q(x_k)$ con $B$-suavidad: \\
+$Q(x_1)=3^2\cdot 7$, vector módulo 2: (0,0,0,1,0), corresponde a $x_1=52$. \\
+$Q(x_2)=2^3\cdot 3\cdot 7$, vector módulo 2: (1,1,0,1,0), corresponde a $x_2=53$. \\
+$Q(x_3)=2^7\cdot 3$, vector módulo 2: (1,1,0,0,0), corresponde a $x_3=55$. \\
+$Q(x_4)=3^2\cdot 5\cdot 11$, vector módulo 2: (0,0,1,0,1), corresponde a $x_4=56$. \\
+$Q(x_5)=2^3\cdot 3\cdot 5\cdot 7$, vector módulo 2: (1,1,1,1,0), corresponde a $x_5=59$. \\
+$Q(x_6)=2^3\cdot 3^3\cdot 5$, vector módulo 2: (1,1,1,0,0), corresponde a $x_6=61$. \\
+Matriz aumentada, es decir, los vectores de los (por lo menos $m+1$) $Q(x_k)$ $B$-suaves y al lado la identidad $[V \mid I]$: \\
+$\begin{array}{ccccc|cccccc}
+0&0&0&1&0&1&0&0&0&0&0\\
+1&1&0&1&0&0&1&0&0&0&0\\
+1&1&0&0&0&0&0&1&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+1&1&1&1&0&0&0&0&0&1&0\\
+1&1&1&0&0&0&0&0&0&0&1
+\end{array}$ \\
+Intercambiar fila 1 (f1) y fila 2 (f2): \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&0&1&0&1&0&0&0&0&0\\
+1&1&0&0&0&0&0&1&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+1&1&1&1&0&0&0&0&0&1&0\\
+1&1&1&0&0&0&0&0&0&0&1
+\end{array}$ \\
+f3←f3+f1, \, f5←f5+f1, \, f6←f6+f1: \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&0&1&0&1&0&0&0&0&0\\
+0&0&0&1&0&0&1&1&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+0&0&1&0&0&0&1&0&0&1&0\\
+0&0&1&1&0&0&1&0&0&0&1
+\end{array}$  \\
+Intercambiar f2 y f4: \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+0&0&0&1&0&0&1&1&0&0&0\\
+0&0&0&1&0&1&0&0&0&0&0\\
+0&0&1&0&0&0&1&0&0&1&0\\
+0&0&1&1&0&0&1&0&0&0&1
+\end{array}$ \\
+f5←f5+f2, \, f6←f6+f2: \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+0&0&0&1&0&0&1&1&0&0&0\\
+0&0&0&1&0&1&0&0&0&0&0\\
+0&0&0&0&1&0&1&0&1&1&0\\
+0&0&0&1&1&0&1&0&1&0&1
+\end{array}$ \\
+f4←f4+f3, \, f6←f6+f3: \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+0&0&0&1&0&0&1&1&0&0&0\\
+0&0&0&0&0&1&1&1&0&0&0\\
+0&0&0&0&1&0&1&0&1&1&0\\
+0&0&0&0&1&0&0&1&1&0&1
+\end{array}$ \\
+Intercambiar f4 y f5: \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+0&0&0&1&0&0&1&1&0&0&0\\
+0&0&0&0&1&0&1&0&1&1&0\\
+0&0&0&0&0&1&1&1&0&0&0\\
+0&0&0&0&1&0&0&1&1&0&1
+\end{array}$ \\
+f6←f6+f4: \\
+$\begin{array}{ccccc|cccccc}
+1&1&0&1&0&0&1&0&0&0&0\\
+0&0&1&0&1&0&0&0&1&0&0\\
+0&0&0&1&0&0&1&1&0&0&0\\
+0&0&0&0&1&0&1&0&1&1&0\\
+0&0&0&0&0&1&1&1&0&0&0\\
+0&0&0&0&0&0&1&1&0&1&1
+\end{array}$ \\
+Las dos últimas filas de la parte aumentada (derecha), que corresponden a las filas de ceros de la eliminación gaussiana, señalan los vectores de dependencia.\\
+Por ejemplo, (1,1,1,0,0,0) indica que los tres primeros vectores son linealmente dependientes, como ya se sabe. \\
+Adicionalmente, (0,1,1,0,1,1) indica que los vectores correspondientes a $Q(x_2)$, $Q(x_3)$, $Q(x_5)$ y $Q(x_6)$ también son linealmente dependientes. \\
+En efecto, su suma XOR da: \\
+(1,1,0,1,0) + (1,1,0,0,0) + (1,1,1,1,0) + (1,1,1,0,0) = (0,0,0,0,0) \\
+\end{ejemplo}
+
+Ahora trataremos dos partes nodales. \\
+1) ¿Cómo elegimos los primos de la base $B$? \\
+2) Dado $x_k$ calculamos $Q(x_k)=(x_k)^2 - n$: ¿Cómo determinamos que $Q(x_k)$ es $B$-suave? \\
+
+En $B$ se coloca un conjunto de primos cuyo número es relativamente arbitrario, deben ser primos pequeños. \\
+Para primos $p$ impares, se incluyen sólo aquellos tales que $\jac{n}{p}=1$, donde se utiliza el símbolo de Jacobi. \\
+La explicación es que un primo $p$ de la base $B$ es útil sólo si puede llegar a dividir a algún $Q(x) = x^2 - n$. \\
+$p \mid Q(x) \iff p \mid x^2 - n \qquad$ obvio \\
+$\iff x^2 \equiv n \pmod p \qquad\quad\;$ por el Enunciado~\ref{enun:congrViaDivisib} \\
+Ello ocurre sólo cuando el símbolo de Jacobi toma el valor 1: $\jac{n}{p} = 1$. \\
+El primo 2 se incluye siempre cuando $n$ es impar, fruto de un análisis directo de la congruencia $x^2 \equiv n \pmod 2$. \\
+El fundamento de halla en la Subsección~\ref{subsec:Fundcuadratica} referida a Jacobi, en particular los enunciados "TAL y TAL y TAL (incluir lo de Jorge en tal subsección)". 
+
+\begin{ejemplo} \, \\
+Sea $n=2641$. \\
+Se elige la base $B = \{ 2,3,5,7,11 \}$. En efecto: \\
+$\forall p \in B \, \jac{2641}{p}=1$. \\
+Sea $n=2449$. \\
+Como 2 se incluye directamente, consideremos los primos $\{3,5,7,11,13,17,19\}$. \\
+Para $p=7,11,13$: $\jac{2449}{p}=-1$. \\
+Por ello $B = \{ 2,3,5,17,19 \}$. \\
+Con $p=7,11$ o $13$, ningún $Q(x)$ es múltiplo de $7,11$ o $13$, no hay solución para $x^2 \equiv n \pmod p$ con estos primos $p$.
+\end{ejemplo}
+
+Como muestra el ejemplo, $B$ no se forma con los primeros $k$ primos necesariamente, salta aquellos para los que el símbolo de Jacobi no da 1. \\
+
+La determinación de la $B$-suavidad de $Q(x_k)$ puede hacerse con fuerza bruta, viendo si se puede dividir $Q(x)$ con algún primo de la base $B$ y aplicando recurrentemente lo mismo al resultado de la división hasta obtener 1 (si es el caso). \\
+
+Hay otro modo que incluye el hecho de por qué se llama criba a este método.\\
+Para la descripción, se muestran ejemplos usando factores, pero debe recordarse que sólo es por claridad.  \\
+
+Dados $n$ y $B$, consideramos los enteros $x_k$ en algún rango (en principio, alrededor de $\sqrt n$). No es inusual trabajar con $[\sqrt n - M, \sqrt n + M]$, para $M$ arbitrario.
+  \\
+Calculamos $Q(x_k) =  x_k^2 - n$ para los enteros considerados en dicho rango. \\
+Luego se criban todos estos valores $Q(x_k)$, para quedarnos sólo con los que sean $B$-suaves.  
+
+\begin{ejemplo} \, \\
+Sea $n = 2461$. \\
+Sea la base $B = \{2, 3, 5, 7, 11,13\}$. \\
+$\sqrt n = \sqrt {2461} = 49.6$ \\
+Se consideran los siguientes $x_k$ y sus correspondientes $Q(x_k)$: \\
+Sí \, $B$-suave. $x_0= 49, Q(x_1)=-60=-1 \cdot 2^2 \cdot 3 \cdot  5$  \\
+Sí \, $B$-suave. $x_1= 50, Q(x_1)=39=3 \cdot 13$  \\
+Sí \, $B$-suave. $x_2= 51, Q(x_2)=140=2^2 \cdot 5 \cdot 7$ \\
+Sí \, $B$-suave. $x_3= 52, Q(x_3)=243=3^5$ \\
+No $B$-suave. $x_4= 53, Q(x_4)=348=2^2 \cdot 3 \cdot 29$\\
+Sí \, $B$-suave. $x_5= 54, Q(x_5)=455=5 \cdot 7 \cdot 13$ \\
+No $B$-suave. $x_6= 55, Q(x_6)=564=2^2 \cdot 3 \cdot 47$ \\
+Sí \, $B$-suave. $x_7= 56, Q(x_7)=675=3^3 \cdot 5^2$ \\
+No $B$-suave. $x_8= 57, Q(x_8)=788=2^2 \cdot 197$ \\
+\end{ejemplo}
+
+Se describe ahora el procedimiento que detecta $B$-suavidad. \\
+Para cada primo $p \in B$ se calculan las raíces de $x^2 \equiv n \pmod p$, si existen. \\
+Luego indicaremos cómo puede hacerse ello.
+
+\begin{ejemplo} \, \\
+Sea $n = 2461$. \\
+Sea $B = \{2, 3, 5, 7, 11,13\}$. \\
+La ecuación $x^2 \equiv 2461 \pmod p$ tiene estas soluciones (raíces): \\
+$p_1= 2$, raíces: $1$ \\ 
+$p_2= 3$, raíces: $1,2$ \\ 
+$p_3= 5$, raíces: $1,4$ \\ 
+$p_4= 7$, raíces: $2,5$ \\ 
+$p_5= 11$, raíces: no tiene soluciones enteras, no hay raíces \\ 
+$p_6= 13$, raíces: $2, 11$ \\ 
+\end{ejemplo}
+
+Ya se vio que $p \mid Q(x) \iff x^2 \equiv n \pmod p$. \\
+Es decir, los $x$ que nos sirven son las raíces de la ecuación en congruencia, que son tales que $p$ divide a $Q(x)$: y sirven porque son un paso adelante para decir que $Q(x)$ es $B$-suave pues $p$ es un factor de $Q(x)$. \\
+Si $x_k$ es útil en ese sentido, cualquier valor de la forma $x_k + qp$ también sirve. \\
+En efecto, si $x^2 \equiv n \pmod p$, es claro que $(x+qp)^2 \equiv n \pmod p$. \\
+Pues tal congruencia es la misma que: $x^2+2xqp+q^2p^2 \equiv n \pmod p$\\
+Y es obvio que $2xqp \equiv 0 \pmod p$ y $q^2p^2 \equiv 0 \pmod p$. \\
+Por el Enunciado~\ref{enun:propCongru}.xi la afirmación sigue. \\
+
+Es decir, para cada primo $p \in B$, calculamos las raíces de la ecuación $ x^2 \equiv n \pmod p$ y esos son los $x_k$ que nos interesan: las raíces y sus secuencias $x_k+qp$, porque los $Q(x)$ correspondientes tienen a $p$ como factor.  \\
+
+\begin{ejemplo} \, \\
+Sea $n = 2461$. \\
+Sea $B = \{2, 3, 5, 7, 11,13\}$. \\
+Rango de enteros en consideración: [50,57]. \\ 
+$p_3= 5$, raíces: $1,4$ \\
+Por tanto nos sirven los enteros $1+5q$ y $4+5q$, que para el rango bajo consideración son: \\
+$x_k=51$, $x_k=54$ y $x_k=56$.
+Sirven porque sus correspondientes $Q(x)$ son: \\
+$Q(51)=140$, $Q(54)=455$ y $Q(56)=675$ que tienen a 5 como factor, son tales que 5 los divide. \\
+Estos $Q(x)$ no están desechados de ser $B$-suaves, al contrario pintan bien, hasta el momento su(s) factor(es) está(n) en $B$. \\ 
+$p_6= 13$, raíces: $2,11$ \\
+Por tanto nos sirven los enteros $2+13q \,$ y $\, 11+13q$, que para el rango bajo consideración son: \\
+$x_k=50$ y $x_k=54$.
+Sirven porque sus correspondientes $Q(x)$ son: \\
+$Q(50)=39$ y $Q(54)=455$ que tienen a 13 como factor, son tales que 13 los divide. \\
+Estos $Q(x)$ no están desechados de ser $B$-suaves, al contrario pintan bien, hasta el momento su(s) factor(es) está(n) en $B$. \\
+\end{ejemplo} 
+
+Ahora se introduce el mecanismo de criba: se 'tachan' o 'marcan' los $Q(x)$ que tienen a $p_i \in B$ como factor. \\
+En este contexto, se introduce un nuevo significado para tachar: \\
+Como $p_i$ es un factor de $Q(x)$, tachar o marcar $Q(x)$ significará dividirlo entre $p_i$. \\
+
+\begin{ejemplo} \, \\
+Sea $n = 2461$. \\
+Sea $B = \{2, 3, 5, 7, 11,13\}$. \\
+Rango de enteros en consideración: [50,57]. \\
+Con $p_i= 3$, raíces: $1,2$ \\
+Nos sirven los enteros $1+3q \,$ y $\, 2+3q$, para el rango son: $x_k=50, 52, 53, 55, 56$. \\
+Tachamos sus correspondientes $Q(x)$, en vez de tachar pondremos una flecha ($\rightarrow$) y luego su nuevo valor (nótese que $39/3=13$, $243/3=81$, $348/3=116$, $564/3=188$ y $675/3=225$): \\
+\begin{tabular}{|c|c|}
+\hline
+$x_i$ & $Q(x_i)$ \\
+\hline
+50 & 39 $\rightarrow$ 13 \\
+51 & 140 \\
+52 & 243 $\rightarrow$ 81 \\
+53 & 348 $\rightarrow$ 116 \\
+54 & 455 \\
+55 & 564 $\rightarrow$ 188 \\
+56 & 675 $\rightarrow$ 225 \\
+57 & 788 \\
+\hline
+\end{tabular}
+
+Con $p_i= 13$, raíces: $2,11$ \\
+Nos sirven los enteros $2+13q$ y $11+13q$, para el rango bajo consideración son: $x_k=50,54$. \\
+Tachamos sus correspondientes $Q(x)$, en vez de tachar pondremos una flecha ($\rightarrow$) y luego su nuevo valor (nótese que $13 / 13=1$ y $455 / 13=35$): \\
+\begin{tabular}{|c|c|}
+\hline
+$x_i$ & $Q(x_i)$ \\
+\hline
+50 & 39 $\rightarrow$ 13 $\rightarrow$ 1 \\
+51 & 140 \\
+52 & 243 $\rightarrow$ 81 \\
+53 & 348 $\rightarrow$ 116 \\
+54 & 455 $\rightarrow$ 35 \\
+55 & 564 $\rightarrow$ 188 \\
+56 & 675 $\rightarrow$ 225 \\
+57 & 788 \\
+\hline
+\end{tabular}
+
+Para $x_k=50$, se tiene inicialmente $Q(x_k)=39$. \\
+Con las tachaduras (divisiones) se ha reducido a $1$. Eso quiere decir que es definitivamente $B$-suave, se puede factorizar con los primos de $B$. En efecto, $39=3 \cdot 13$.
+\end{ejemplo} 
+
+Si aplicamos logaritmo, empezando en $\log Q(x)$, una división $Q(x) / p$ se transforma en la resta $\log {Q(x)} - \log p$; es claro que las reducciones tienen ahora la meta $0$ (en vez de $1$). \\
+
+Es obvio que se debe hacer la criba para todos los primos en $B$.
+
+\begin{ejemplo} \, \\
+Sea $n = 2461$. \\
+Sea $B = \{2, 3, 5, 7, 11,13\}$. \\
+Rango de enteros en consideración: [50,57]. \\
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline
+$x_i$ & $Q(x_i)$ & $\log(Q(x))$ & $p=2$ & $p=3$ & $p=5$ & $p=7$ & $p=11$ & $p=13$ \\
+\hline
+50 & 39   & 3.66 &      & 2.56  &       &       &       & 0  \\
+51 & 140  & 4.94 & 4.25 &       & 2.64  & 0.69  &       &   \\
+52 & 243  & 5.49 &      & 4.39  &       &       &       &   \\
+53 & 348  & 5.85 & 5.16 & 4.06  &       &       &       &   \\
+54 & 455  & 6.12 &      &       & 4.51  & 2.56  &       & 0 \\
+55 & 564  & 6.34 & 5.64 & 4.54  &       &       &       &   \\
+56 & 675  & 6.51 &      & 5.42  & 3.81  &       &       &   \\
+57 & 788  & 6.67 & 5.98 &       &       &       &       &   \\
+\hline
+\end{tabular}
+
+Nótese que reemplazamos las flechas ($\rightarrow$) por el uso de columnas. \\
+Para $p=2$, la raíz es $1$, en el rango tachamos los enteros $1+2q$, es decir, $51, 53, 55, 57$. En particular $x=53$, por ello $\log {Q(53)} = \log {348} = 5.85$ se reduce en $\log p = log 2 = 0.69$, es decir, el nuevo $\log Q(x)= 5.16$. No toca $x=54$. \\
+Para $p=3$, la raíces son $1$ y $2$, en el rango tachamos los enteros $1+3q$ y $2+3q$, es decir, $50, 52, 53, 55, 56$. En particular $x=53$, por ello el más reciente $\log {Q(53)} = 5.16$ se reduce otra vez en $\log p = \log 3 = 1.09$, es decir, el nuevo $\log Q(x)= 4.06$. No toca $x=54$. \\
+Para $p=5$, la raíces son $1$ y $4$, en el rango tachamos los enteros $1+5q$ y $4+5q$, es decir, $51, 54, 56$. En particular $x=54$, por ello $\log {Q(54)} = \log {455} = 6.12$ se reduce en $\log p = \log 5 = 1.609$, es decir, el nuevo $\log Q(x)= 4.52$. No toca $x=53$. \\
+Para $p=7$, la raíces son $2$ y $5$, en el rango tachamos los enteros $2+7q$ y $5+7q$, es decir, $51, 54$. En particular $x=54$, por ello el más reciente $\log {Q(54)} = 4.51$ se reduce otra vez en $\log p = \log 7 = 1.945$, es decir, el nuevo $\log Q(x)= 2.56$. No toca $x=53$. \\
+Para $p=11$ no hay raíces, Ni tratamiento. \\
+Para $p=13$, la raíces son $2$ y $12$, en el rango tachamos los enteros $2+13q$ y $11+13q$, es decir, $50$ y $54$. En particular $x=54$, por ello el más reciente $\log {Q(54)} = 2.56$ se reduce otra vez en $\log p = \log 13 = 2.56$, es decir, el nuevo $\log Q(x)= 0$. No toca $x=53$. \\
+Nótese que para $x=53$ no hemos podido reducir el $\log Q(53)=5,85$ original a $0$. Por ello $Q(53)$ no es $B$-suave. En efecto, $348=2^2 \cdot 3 \cdot 29$ y $29$ no está en $B$. \\
+Nótese que para $x=54$ hemos reducido el $\log Q(54)=6.12$ original a $0$. Por ello sí es $B$-suave. En efecto, $455=5 \cdot 7 \cdot 13$ con todos sus factores en $B$. \\
+\end{ejemplo}
+
+Nótese que aunque $n$ sea impar, los $Q(x)$ pueden llegar a ser pares, de ahí que la inclusión de $2$ a $B$ es pertinente. \\
+
+Los ejemplos son sólo eso. Se los hace cortos con fines de claridad. Es evidente, que si $|B|=m$, se requieren más de $m$ $Q(x)$ $B$-suaves.\\
+Pero ello obligaría a escribir tablas eventualmente grandes. \\
+
+Resumiendo: \\
+Dados $n$, $B$ y un rango de trabajo (por ejemplo un subrango de  $[\sqrt n - M, \sqrt n + M]$, con $M$ arbitrario) de donde obtenemos los $x_k$: \\
+- se halla $\log Q(x_k)$ para todos los enteros $x_k$ \\
+- se halla las raíces de $x^2 \equiv n \pmod p$, para cada primo $p$ en $B$ \\
+- para los primos $p$ con raíces, se recorre los $x_k$ que igualan con $c+qp$ (donde $c$ denota una raíz) y se criba el valor actual de $\log Q(x_k)$ reduciéndolo en $\log p$ \\
+La meta es llegar a $0$, en cuyo caso el $Q(x)$ original es $B$-suave. \\
+
+Hay razones por las que el $0$ puede flexibilizarse definiendo un umbral algo mayor, es usual definirlo como $1$ (o excepcionalmente como $2$). \\
+Es decir, aceptar que las restas hagan a $\log Q(x_k) <$ umbral en vez del estricto igual a $0$. \\
+Por ejemplo, los logaritmos no tienen precisión absoluta o bien se usan logaritmos truncados; la diferencia residual acumulada puede ser pequeña pero no nula. \\
+Otra posibilidad es que, por un asunto de eficiencia, para bases $B$ muy grandes se haga la criba con subconjuntos de la base, las reducciones pueden descender hasta debajo del umbral para candidatos potenciales, luego se intenta la factorización con todo $B$ para confirmar o descartar la $B$-suavidad de sólo estos candidatos en vez de todo el conjunto inicial de $Q(x_k)$. \\
+Otra posibilidad es la siguiente (aunque hay formas elegantes de manejarla): nótese que al  obtener la raíces para el primo $p$, la criba resta $\log p$ una vez, cuando $p$ es un factor de $Q(x_k)$, pero puede ser que el exponente de este factor sea mayor a $1$, es decir, que $p$ sea un factor repetido. El umbral podría cubrir estos defectos. \\
+Como en el caso de trabajar subconjuntos de $B$, para las otras posibilidades en las que se desciende hasta debajo del umbral se intenta la factorización con todo $B$ para confirmar o descartar la $B$-suavidad de sólo los candidatos que logren tal descenso. \\
+

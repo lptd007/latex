@@ -1,0 +1,1177 @@
+\chapter{Teoría de Residuos Cuadráticos y su Aplicación}
+\section{Residuos cuadráticos}
+Sea $a$ un entero y $m$ un entero positivo. Se dice que $a$ es un \textbf{residuo cuadrático} módulo $m$ si $\gcd(a, m) = 1$ y existe un entero $x$ tal que se satisface la siguiente congruencia:
+\begin{equation}
+    x^2 \equiv a \pmod{m}
+\end{equation}
+Si no existe tal solución para $x$, entonces $a$ se denomina un \textbf{residuo no cuadrático} módulo $m$. En el caso de un primo impar $p$, exactamente la mitad de los números en el conjunto $\{1, 2, \dots, p-1\}$ son residuos cuadráticos.
+
+\subsection{Residuos cuadráticos de números primos}
+Cuando el módulo es un número primo, el estudio se denomina \textbf{residuos cuadráticos módulo un primo}. Como se mencionó, si el módulo es un primo impar $p$, exactamente $(p-1)/2$ de los números entre $1$ y $p-1$ son residuos cuadráticos, y la otra mitad son no residuos.
+
+\begin{ejemplo}[Módulo 11 (primo)]
+\end{ejemplo}
+\begin{solucion}
+Al elevar al cuadrado los números del 1 al 10 y calcular su resto módulo 11, obtenemos:
+
+\begin{itemize}
+    \item $1^2 \equiv 10^2 \equiv 1 \pmod{11}$
+    \item $2^2 \equiv 9^2 \equiv 4 \pmod{11}$
+    \item $3^2 \equiv 8^2 \equiv 9 \pmod{11}$
+    \item $4^2 \equiv 7^2 \equiv 5 \pmod{11}$
+    \item $5^2 \equiv 6^2 \equiv 3 \pmod{11}$
+\end{itemize}
+El conjunto de residuos cuadráticos módulo 11 es $\{1, 3, 4, 5, 9\}$.
+\end{solucion}
+
+\begin{ejemplo}[Módulo 13 (primo)]
+\end{ejemplo}
+\begin{solucion}
+Al elevar al cuadrado los números del 1 al 12 módulo 13, se obtienen los siguientes residuos cuadráticos:
+\begin{itemize}
+\item Residuos: $\{1,3,4,9,10,12\}$.
+\item No residuos: $\{2,5,6,7,8,11\}$.
+\end{itemize}
+Vea que, como establece la teoría, exactamente la mitad de los elementos (6 de 12) son residuos cuadráticos.
+Para hallar los residuos cuadráticos de un número primo se puede utilizar el siguiente programa:
+
+\begin{verbatim}
+def residuos_cuadraticos_primo(p):
+    """Devuelve el conjunto de residuos cuadraticos modulo el primo p."""
+    if p == 2:
+        return {0, 1}
+    mitad = p // 2 + 1  # por simetria de cuadrados solo se necesita la mitad
+    return {(i * i) % p for i in range(1, mitad)}
+
+# Pruebas
+print(residuos_cuadraticos_primo(11))
+print(residuos_cuadraticos_primo(2))
+print(residuos_cuadraticos_primo(13))
+print(residuos_cuadraticos_primo(17))
+\end{verbatim}
+\end{solucion}
+
+\subsection{Residuos cuadráticos de números compuestos}
+Para los números compuestos, los residuos cuadráticos se hallan descomponiendo primero el número en sus factores primos. Solo se toman en cuenta los residuos cuadráticos que simultáneamente se comparten en todos sus factores, y solo los números cuyo máximo común divisor con el módulo es $1$.
+
+\begin{ejemplo}[Módulo 21 (compuesto)]
+\end{ejemplo}
+\begin{solucion}
+Para un número compuesto como $n = 21$ ($3 \times 7$), un número es residuo cuadrático solo si es un cuadrado perfecto tanto módulo 3 como módulo 7 simultáneamente y no comparte factores con 21.
+\begin{itemize}
+	\item Calculamos los cuadrados de los números que son primos relativos con 21:
+	\begin{itemize}
+	\item $1^2 = 1 \equiv 1 \pmod{21}$
+	\item $2^2 = 4 \equiv 4 \pmod{21}$
+	\item $4^2 = 16 \equiv 16 \pmod{21}$
+	\item $5^2 = 25 \equiv 4 \pmod{21}$
+	\item $8^2 = 64 \equiv 1 \pmod{21}$
+	\item $10^2 = 100 \equiv 16 \pmod{21}$
+	\item $11^2 = 121 \equiv 16 \pmod{21}$
+	\item $13^2 = 169 \equiv 1 \pmod{21}$
+	\item $17^2 = 289 \equiv 16 \pmod{21}$
+	\item $19^2 = 361 \equiv 4 \pmod{21}$
+	\item $20^2 = 400 \equiv 1 \pmod{21}$
+	\end{itemize}
+    \item El conjunto de los residuos cuadráticos módulo 21 es: $\{1, 4, 16\}$.
+\end{itemize}
+El programa para hallar los residuos cuadráticos de un número compuesto:
+\begin{verbatim}
+from math import gcd
+
+def residuos_cuadraticos_compuesto(n):
+    """Devuelve el conjunto de residuos cuadraticos modulo n (n compuesto)."""
+    mitad = n // 2 + 1  # por simetria de cuadrados solo se necesita la mitad
+    return {(i * i) % n for i in range(1, mitad) if gcd(i, n) == 1}
+
+print(residuos_cuadraticos_compuesto(21))
+\end{verbatim}
+\end{solucion}
+
+\subsection{Residuos cuadráticos de números compuestos usando el teorema del residuo chino}
+El proceso de obtener los residuos cuadráticos puede optimizarse con el teorema del residuo chino. Para aplicarlo, primero hay que descomponer el número en sus factores primos.
+
+\begin{ejemplo}[Uso del teorema del residuo chino]
+Hallar los residuos cuadráticos de $21$. Vea que $21 = 3 \times 7$.
+\end{ejemplo}
+\begin{solucion}
+Un número $x$ es un residuo cuadrático módulo $21$ si y solo si es un residuo cuadrático módulo $3$ y módulo $7$ al mismo tiempo.
+
+\begin{enumerate}
+\item Primero se hallan los residuos cuadráticos de sus factores primos.
+Buscamos los residuos cuadráticos (excluyendo el $0$) para cada factor:
+residuos módulo 3: $\{1\}$, residuos módulo 7: $\{1, 2, 4\}$.
+\item Combinar las parejas con el teorema del residuo chino. Combinamos el único residuo módulo 3 con los tres residuos módulo 7. Esto nos da exactamente 3 sistemas de ecuaciones que resolveremos para encontrar los números módulo 21:
+\begin{enumerate}
+\item $(1 \pmod 3, 1 \pmod 7)$. Buscamos un número que deje residuo 1 al dividirlo entre 3 y entre 7. El número $1$ cumple directamente:
+\begin{itemize}
+\item $1 \equiv 1 \pmod 3$
+\item $1 \equiv 1 \pmod 7$
+\end{itemize}
+Primer residuo módulo 21 es: $1$.
+\item $(1 \pmod 3, 4 \pmod 7)$. Buscamos un número que deje residuo 1 módulo 3 y residuo 4 módulo 7. Probamos los múltiplos de 7 más 4 ($4, 11, 18,\dots$):
+\begin{itemize}
+\item $4 \equiv 1 \pmod 3$
+\end{itemize}
+Segundo residuo módulo 21 es: $4$.
+\item $(1 \pmod 3, 2 \pmod 7)$. Buscamos un número que deje residuo 1 módulo 3 y residuo 2 módulo 7. Probamos los múltiplos de 7 más 2 ($2, 9, 16, 23,\dots$):
+\begin{itemize}
+\item $2 \equiv 2 \pmod 3$
+\item $9 \equiv 0 \pmod 3$
+\item $16 \equiv 1 \pmod 3$
+\end{itemize}
+Tercer residuo módulo 21 es: $16$.
+\end{enumerate}
+\end{enumerate}
+Al resolver todas las combinaciones posibles mediante el teorema, obtenemos de forma directa el conjunto de residuos cuadráticos: $\{1, 4, 16\}$.
+\end{solucion}
+
+Este proceso es más eficiente y se utiliza en criptografía, donde hay que trabajar con números grandes. Por ejemplo, para calcular los residuos de $11 \times 13 = 143$, el método tradicional obliga a calcular hasta $142^2 = 20{,}164$. Con el teorema, el número más grande que se elevará al cuadrado será $12^2 = 144$. También se realizan menos operaciones: para un módulo compuesto $n = p \times q$, el método tradicional requiere del orden de $n$ multiplicaciones, mientras que el teorema del residuo chino solo requiere del orden de $p + q$.
+
+\section{Raíz primitiva módulo p}
+\begin{definicion}
+Decimos que $g$ es una \textbf{raíz primitiva} módulo $p$ si el \textbf{orden} de $g$ es exactamente $p-1$.
+\end{definicion}
+
+Esto significa que las primeras $p-1$ potencias de $g$, es decir,
+\[
+g^1, g^2, \dots, g^{p-1},
+\]
+producen \textbf{todos} los números del conjunto
+\[
+\{1, 2, 3, \dots, p-1\}
+\]
+en algún orden, sin repetir ninguno antes de tiempo.
+
+Si tomamos un número $g$ y calculamos sus potencias módulo $p$:
+\[
+g^1, g^2, g^3, g^4, \dots \pmod{p},
+\]
+por el \textbf{Pequeño Teorema de Fermat} sabemos que:
+\[
+g^{p-1} \equiv 1 \pmod{p}.
+\]
+Así que las potencias empiezan a repetirse a partir del exponente $p-1$.
+
+\begin{ejemplo}[Hallar una raíz primitiva para $p=7$]
+\end{ejemplo}
+\begin{solucion}
+Tomemos $p = 7$. Los números coprimos con $7$ son:
+\[
+\{1,2,3,4,5,6\}.
+\]
+
+Probemos con $g = 3$:
+\[
+\begin{aligned}
+3^1 &= 3, \\
+3^2 &= 9 \equiv 2 \pmod{7}, \\
+3^3 &= 27 \equiv 6 \pmod{7}, \\
+3^4 &= 81 \equiv 4 \pmod{7}, \\
+3^5 &= 243 \equiv 5 \pmod{7}, \\
+3^6 &= 729 \equiv 1 \pmod{7}.
+\end{aligned}
+\]
+Las potencias generan:
+\[
+3, 2, 6, 4, 5, 1.
+\]
+Todos los números del 1 al 6 (es decir, $p-1$) aparecen; por lo tanto, \textbf{3 es raíz primitiva módulo 7}.
+
+Probemos con $g = 2$:
+\[
+\begin{aligned}
+2^1 &= 2, \\
+2^2 &= 4, \\
+2^3 &= 8 \equiv 1 \pmod{7}, \\
+2^4 &\equiv 2 \pmod{7} \quad (\text{ya se repite}).
+\end{aligned}
+\]
+Las potencias generan solo:
+\[
+2, 4, 1.
+\]
+Faltan el 3, el 5 y el 6. Por lo tanto, \textbf{2 no es raíz primitiva módulo 7}.
+\end{solucion}
+
+\section{Criterio de Euler}
+
+El \textbf{Criterio de Euler} es un resultado de la teoría de números que permite determinar si un número es un \emph{residuo cuadrático módulo un primo} sin necesidad de encontrar explícitamente su raíz cuadrada.
+
+\begin{teorema}[Criterio de Euler]
+Sea $p$ un número primo impar y sea $a$ un entero tal que $\gcd(a, p) = 1$ (es decir, $p \nmid a$). Entonces:
+\[
+a^{\frac{p-1}{2}} \equiv
+\begin{cases}
+1 \pmod{p} & \text{si } a \text{ es un residuo cuadrático módulo } p, \\
+-1 \pmod{p} & \text{si } a \text{ es un no residuo cuadrático módulo } p.
+\end{cases}
+\]
+\end{teorema}
+
+\begin{proof}
+Se apoya en el \textbf{Pequeño Teorema de Fermat}, que dice que $a^{p-1} \equiv 1 \pmod{p}$. Esto implica que:
+\[
+\left(a^{\frac{p-1}{2}}\right)^2 \equiv 1 \pmod{p}.
+\]
+Como $\mathbb{Z}/p\mathbb{Z}$ es un cuerpo (porque $p$ es primo), la ecuación $x^2 \equiv 1$ solo tiene dos soluciones: $x = \pm 1$. Por lo tanto $a^{\frac{p-1}{2}}$ debe ser congruente con $1$ o con $-1$ módulo $p$.
+
+Se demuestra que efectivamente da $1$ cuando existe $b$ tal que $b^2 \equiv a \pmod{p}$ (porque entonces $a^{\frac{p-1}{2}} = b^{p-1} \equiv 1$), y da $-1$ en caso contrario, usando el hecho de que exactamente la mitad de los elementos no nulos módulo $p$ son residuos cuadráticos.
+\end{proof}
+
+\begin{ejemplo}
+¿Es $a = 3$ un residuo cuadrático módulo $p = 7$?
+\end{ejemplo}
+\begin{solucion}
+\[
+3^{\frac{7-1}{2}} = 3^3 = 27 \equiv 27 - 21 = 6 \equiv -1 \pmod{7}.
+\]
+Como el resultado es $-1$, concluimos que \textbf{3 no es residuo cuadrático módulo 7}.
+\end{solucion}
+
+\subsection*{Importancia}
+
+El criterio de Euler es una herramienta clave porque:
+
+\begin{itemize}
+    \item Da un \textbf{algoritmo eficiente} (mediante exponenciación rápida) para decidir si $a$ es residuo cuadrático módulo $p$, sin necesidad de probar todos los cuadrados.
+    \item Es la base para demostrar propiedades del símbolo de Legendre, como su multiplicatividad.
+    \item Se usa como paso intermedio en la demostración de la \textbf{Ley de Reciprocidad Cuadrática}, uno de los resultados más importantes de la teoría de números.
+\end{itemize}
+
+\subsection{Algoritmo computacional}
+Para conocer si un número $a$ es residuo cuadrático módulo un primo $p$ es conveniente utilizar el criterio de Euler; este solo se define si el primo es impar. Primero hay que verificar si $p$ divide a $a$, en cuyo caso el símbolo vale $0$. Luego se aplica exponenciación modular para obtener la respuesta: si el resultado es $1$, entonces $a$ es residuo cuadrático; si es $-1$, no lo es.
+
+\begin{verbatim}
+def es_residuo_cuadratico(a, p):
+    """Indica si a es residuo cuadratico modulo el primo impar p (criterio de Euler)."""
+    if a % p == 0:
+        return True  # convencion: 0 se considera residuo cuadratico
+    return pow(a, (p - 1) // 2, p) == 1
+\end{verbatim}
+
+
+\section{Símbolo de Legendre}
+
+\begin{definicion}
+Para un primo impar $p$, el símbolo de Legendre $\legs{a}{p}$ es una función que permite identificar el carácter cuadrático de un número y se define como:
+\begin{equation}
+    \legs{a}{p} =
+    \begin{cases}
+      1 & \text{si } a \text{ es un residuo cuadrático mod } p, \\
+      -1 & \text{si } a \text{ es un no-residuo cuadrático mod } p, \\
+      0 & \text{si } p \mid a.
+    \end{cases}
+\end{equation}
+\end{definicion}
+En términos más simples: dice si existe algún entero $x$ tal que $x^2 \equiv a \pmod{p}$.
+
+En teoría de números tiene aplicaciones importantes:
+\begin{enumerate}
+    \item \textbf{Residuos cuadráticos:} Determinar si una ecuación $x^2 \equiv a \pmod{p}$ tiene solución.
+    \item \textbf{Criptografía:} Métodos de cifrado probabilístico como el de Goldwasser-Micali.
+    \item \textbf{Primalidad:} Test de Solovay-Strassen.
+    \item \textbf{Teoría de cuerpos finitos:} Estudio de extensiones algebraicas y curvas elípticas.
+\end{enumerate}
+\subsection{Propiedades fundamentales}
+\subsubsection{Periodicidad en el numerador}
+
+\begin{teorema}
+Si $a \equiv b \pmod{p}$, entonces
+\[
+\legs{a}{p} = \legs{b}{p}.
+\]
+\end{teorema}
+\begin{proof}
+La definición de residuo cuadrático depende únicamente de la clase de congruencia módulo $p$. Si $a \equiv b \pmod{p}$, entonces la ecuación $x^2 \equiv a \pmod{p}$ tiene solución si y solo si $x^2 \equiv b \pmod{p}$ tiene solución, ya que son la misma congruencia. Por lo tanto, el símbolo es el mismo.
+\end{proof}
+
+\begin{ejemplo}
+Calcular $\legs{17}{5}$.
+\end{ejemplo}
+\begin{solucion}
+Como $17 \equiv 2 \pmod{5}$, por periodicidad:
+\[
+\legs{17}{5} = \legs{2}{5}.
+\]
+Los residuos cuadráticos módulo $5$ son $1, 4$. Como $2$ no está en la lista:
+\[
+\legs{17}{5} = -1.
+\]
+\end{solucion}
+
+\subsubsection{Multiplicatividad}
+
+\begin{teorema}
+Para cualesquiera enteros $a, b$:
+\[
+\legs{ab}{p} = \legs{a}{p} \cdot \legs{b}{p}.
+\]
+\end{teorema}
+
+\begin{proof}
+Usamos el criterio de Euler. Para $p \nmid ab$:
+\[
+\legs{ab}{p} \equiv (ab)^{\frac{p-1}{2}} = a^{\frac{p-1}{2}} b^{\frac{p-1}{2}} \equiv \legs{a}{p} \legs{b}{p} \pmod{p}.
+\]
+Como ambos lados son $\pm 1$ y $p$ es impar, la congruencia implica igualdad. Si $p$ divide a $a$ o a $b$, ambos lados son $0$.
+\end{proof}
+
+\begin{ejemplo}
+Calcular $\legs{6}{7}$.
+\end{ejemplo}
+\begin{solucion}
+Por multiplicatividad:
+\[
+\legs{6}{7} = \legs{2}{7} \cdot \legs{3}{7}.
+\]
+Los residuos cuadráticos módulo $7$ son $1, 2, 4$. Entonces $\legs{2}{7} = 1$ y $\legs{3}{7} = -1$. Por lo tanto:
+\[
+\legs{6}{7} = 1 \cdot (-1) = -1.
+\]
+Verificación: $x^2 \equiv 6 \pmod{7}$ no tiene solución.
+\end{solucion}
+
+\subsubsection{Fórmula del complemento}
+
+\begin{teorema}
+Para cualquier entero $a$ factorizado como $a = \pm 2^k \prod_{i=1}^r q_i^{e_i}$ (con $q_i$ primos impares):
+\[
+\legs{a}{p} =
+\legs{-1}{p}^{\epsilon} \cdot
+\legs{2}{p}^{k} \cdot
+\prod_{i=1}^r \legs{q_i}{p}^{e_i},
+\]
+donde $\epsilon = 1$ si $a$ es negativo y $\epsilon = 0$ si $a$ es positivo.
+\end{teorema}
+
+\begin{proof}
+Es consecuencia directa de la multiplicatividad. Aplicamos la propiedad multiplicativa repetidamente:
+\[
+\legs{a}{p} = \legs{\pm 1}{p} \legs{2}{p}^k \prod_{i=1}^r \legs{q_i}{p}^{e_i}.
+\]
+El signo se maneja con $\legs{-1}{p}$. La propiedad de los exponentes sale de $\legs{q^e}{p} = \legs{q}{p}^e$.
+\end{proof}
+
+\begin{ejemplo}
+Calcular $\legs{18}{31}$.
+\end{ejemplo}
+\begin{solucion}
+Factorizamos: $18 = 2 \cdot 3^2$.
+\[
+\legs{18}{31} = \legs{2}{31} \cdot \legs{3}{31}^2.
+\]
+Como $31 \equiv 7 \pmod{8}$, tenemos $\legs{2}{31} = 1$.
+Además, $\legs{3}{31}^2 = 1$.
+Por lo tanto:
+\[
+\legs{18}{31} = 1 \cdot 1 = 1.
+\]
+Verificación: $7^2 \equiv 49 \equiv 18 \pmod{31}$.
+\end{solucion}
+
+\begin{ejemplo}
+Calcular $\legs{-10}{23}$.
+\end{ejemplo}
+\begin{solucion}
+Factorizamos: $-10 = -1 \cdot 2 \cdot 5$.
+\[
+\legs{-10}{23} = \legs{-1}{23} \cdot \legs{2}{23} \cdot \legs{5}{23}.
+\]
+Como $23 \equiv 3 \pmod{4}$:
+\[
+\legs{-1}{23} = -1.
+\]
+Como $23 \equiv 7 \pmod{8}$:
+\[
+\legs{2}{23} = 1.
+\]
+Para $\legs{5}{23}$, usamos reciprocidad: $5 \equiv 1 \pmod{4}$, así que:
+\[
+\legs{5}{23} = \legs{23}{5} = \legs{3}{5} = -1.
+\]
+Por lo tanto:
+\[
+\legs{-10}{23} = (-1) \cdot 1 \cdot (-1) = 1.
+\]
+Verificación: probando $x=1,\dots,22$ se observa que ninguno de $x^2$ da directamente $-10 \equiv 13 \pmod{23}$ salvo
+\[
+17^2 = 289 \equiv 13 \equiv -10 \pmod{23}.
+\]
+Por lo tanto $x=17$ (y $x=6$, su opuesto) es solución.
+\end{solucion}
+
+\subsubsection{Invariancia por cuadrados}
+
+\begin{corolario}
+Si $p \nmid a$, entonces:
+\[
+\legs{a^2}{p} = 1.
+\]
+\end{corolario}
+
+\begin{proof}
+Es consecuencia inmediata de la multiplicatividad:
+\[
+\legs{a^2}{p} = \legs{a}{p}^2 = 1,
+\]
+ya que $\legs{a}{p} = \pm 1$.
+\end{proof}
+
+\begin{ejemplo}
+Calcular $\legs{25}{7}$.
+\end{ejemplo}
+\begin{solucion}
+$25 = 5^2$, por lo tanto:
+\[
+\legs{25}{7} = 1.
+\]
+Verificación: $25 \equiv 4 \pmod{7}$, y $4$ es residuo cuadrático módulo $7$ porque $2^2 \equiv 4 \pmod 7$. Con $x = \pm 5$ tenemos $(\pm 5)^2 \equiv 25 \pmod{7}$.
+\end{solucion}
+
+\subsubsection{Relación con raíces primitivas}
+
+\begin{teorema}
+Si $g$ es raíz primitiva módulo $p$ y $a \equiv g^k \pmod{p}$, entonces:
+\[
+\legs{a}{p} = (-1)^k.
+\]
+\end{teorema}
+
+\begin{proof}
+\[
+\legs{a}{p} \equiv a^{\frac{p-1}{2}} \equiv g^{k\frac{p-1}{2}} \pmod{p}.
+\]
+Como $g^{\frac{p-1}{2}} \equiv -1 \pmod{p}$, tenemos:
+\[
+\legs{a}{p} \equiv (-1)^k \pmod{p}.
+\]
+Ambos lados son $\pm 1$ y $p$ es impar, luego la igualdad es exacta.
+\end{proof}
+
+\begin{ejemplo}
+Sea $g = 2$ raíz primitiva módulo $11$. Calcular $\legs{5}{11}$ usando raíces primitivas.
+\end{ejemplo}
+\begin{solucion}
+Las potencias de $2$ módulo $11$ son:
+\[
+2^1 \equiv 2,\; 2^2 \equiv 4,\; 2^3 \equiv 8,\; 2^4 \equiv 5,\; 2^5 \equiv 10,\; 2^6 \equiv 9,\; 2^7 \equiv 7,\; 2^8 \equiv 3,\; 2^9 \equiv 6,\; 2^{10} \equiv 1.
+\]
+Vemos que $5 \equiv 2^4 \pmod{11}$, así que $k = 4$. Entonces:
+\[
+\legs{5}{11} = (-1)^4 = 1.
+\]
+Verificación: $4^2 \equiv 16 \equiv 5 \pmod{11}$.
+\end{solucion}
+
+\subsubsection{Suma sobre todos los residuos}
+
+\begin{proposicion}
+\[
+\sum_{a=1}^{p-1} \legs{a}{p} = 0.
+\]
+\end{proposicion}
+
+\begin{proof}
+Sea $g$ una raíz primitiva módulo $p$. Los números $1, 2, \ldots, p-1$ son congruentes con $g^0, g^1, \ldots, g^{p-2}$ en algún orden. Entonces:
+\[
+\sum_{a=1}^{p-1} \legs{a}{p} = \sum_{k=0}^{p-2} \legs{g^k}{p} = \sum_{k=0}^{p-2} (-1)^k.
+\]
+Esta suma es $0$ porque $p-2$ es impar (ya que $p$ es primo impar, $p-1$ es par, luego $p-2$ es impar), y los términos $1, -1, 1, -1, \ldots$ se cancelan en pares, sin sobrar ninguno.
+\end{proof}
+
+\begin{ejemplo}
+Verificar la fórmula para $p = 7$.
+\end{ejemplo}
+\begin{solucion}
+Los símbolos módulo $7$:
+\[
+\legs{1}{7} = 1,\; \legs{2}{7} = 1,\; \legs{3}{7} = -1,\; \legs{4}{7} = 1,\; \legs{5}{7} = -1,\; \legs{6}{7} = -1.
+\]
+Suma:
+\[
+1 + 1 - 1 + 1 - 1 - 1 = 0.
+\]
+Correcto.
+\end{solucion}
+
+\subsubsection{El símbolo de Legendre como carácter cuadrático}
+
+\begin{proposicion}
+El símbolo de Legendre es un homomorfismo del grupo multiplicativo $\mathbb{F}_p^*$ en $\{\pm 1\}$. Su núcleo es el subgrupo de los residuos cuadráticos, de índice $2$.
+\end{proposicion}
+
+\begin{proof}
+La multiplicatividad demuestra que es un homomorfismo de grupos. El núcleo es:
+\[
+\ker\legs{\cdot}{p} = \left\{ a \in \mathbb{F}_p^* : \legs{a}{p} = 1 \right\},
+\]
+que es precisamente el conjunto de los residuos cuadráticos. Como la imagen tiene tamaño $2$, el índice del núcleo es $2$, por lo que hay exactamente $\frac{p-1}{2}$ residuos cuadráticos (y otros tantos no residuos) en $\mathbb{F}_p^*$.
+\end{proof}
+
+\begin{ejemplo}
+Para $p = 13$, los residuos cuadráticos son $\{1, 3, 4, 9, 10, 12\}$. Su índice en $\mathbb{F}_{13}^*$ es $2$.
+\end{ejemplo}
+
+\subsubsection{Ley de reciprocidad cuadrática de Gauss}
+
+\begin{teorema}
+Para dos primos impares distintos $p$ y $q$:
+\[
+\legs{p}{q} \cdot \legs{q}{p} = (-1)^{\frac{p-1}{2} \cdot \frac{q-1}{2}}.
+\]
+Equivalentemente:
+\[
+\legs{p}{q} =
+\begin{cases}
+\legs{q}{p} & \text{si } p \equiv 1 \pmod{4} \text{ o } q \equiv 1 \pmod{4}, \\
+-\legs{q}{p} & \text{si } p \equiv q \equiv 3 \pmod{4}.
+\end{cases}
+\]
+\end{teorema}
+
+\begin{proof}
+Sea $S = \left\{ p, 2p, 3p, \ldots, \frac{q-1}{2}p \right\}$. Por el lema de Gauss:
+\[
+\legs{p}{q} = (-1)^n,
+\]
+donde $n$ es el número de elementos de $S$ cuyo residuo módulo $q$ es mayor que $q/2$.
+
+Análogamente, sea $T = \left\{ q, 2q, 3q, \ldots, \frac{p-1}{2}q \right\}$. Entonces:
+\[
+\legs{q}{p} = (-1)^m,
+\]
+donde $m$ es el número de elementos de $T$ cuyo residuo módulo $p$ es mayor que $p/2$.
+
+La idea clave es contar pares $(i,j)$ con $1 \leq i \leq \frac{p-1}{2}$ y $1 \leq j \leq \frac{q-1}{2}$. Se puede demostrar que:
+\[
+n + m \equiv \frac{p-1}{2} \cdot \frac{q-1}{2} \pmod{2}.
+\]
+Esto se hace considerando el retículo de puntos $(i,j)$ y contando cuántos están por debajo o por encima de la recta $qi = pj$. La paridad de estos conteos da exactamente $n+m$.
+
+Por lo tanto:
+\[
+\legs{p}{q} \legs{q}{p} = (-1)^n (-1)^m = (-1)^{n+m} = (-1)^{\frac{p-1}{2} \cdot \frac{q-1}{2}}.
+\]
+Esta es la ley de reciprocidad cuadrática.
+\end{proof}
+
+\begin{ejemplo}
+Calcular $\legs{13}{17}$.
+\end{ejemplo}
+\begin{solucion}
+Aplicamos reciprocidad cuadrática. $13 \equiv 1 \pmod{4}$, así que no hay cambio de signo:
+\[
+\legs{13}{17} = \legs{17}{13}.
+\]
+Reducimos: $17 \equiv 4 \pmod{13}$:
+\[
+\legs{17}{13} = \legs{4}{13}.
+\]
+Como $4 = 2^2$ es un cuadrado:
+\[
+\legs{4}{13} = 1.
+\]
+Por lo tanto, $\legs{13}{17} = 1$.
+Verificación: $x^2\equiv13\pmod{17}$ se satisface con $x=8$ ($8^2=64\equiv13$).
+\end{solucion}
+
+\begin{ejemplo}
+Calcular $\legs{7}{19}$.
+\end{ejemplo}
+\begin{solucion}
+$7 \equiv 3 \pmod{4}$ y $19 \equiv 3 \pmod{4}$, así que hay cambio de signo:
+\[
+\legs{7}{19} = -\legs{19}{7}.
+\]
+Reducimos: $19 \equiv 5 \pmod{7}$:
+\[
+\legs{19}{7} = \legs{5}{7}.
+\]
+Los residuos cuadráticos módulo $7$ son $1, 2, 4$. Como $5$ no está en la lista:
+\[
+\legs{5}{7} = -1.
+\]
+Por lo tanto:
+\[
+\legs{7}{19} = -(-1) = 1.
+\]
+Verificación: $8^2 \equiv 64 \equiv 7 \pmod{19}$.
+\end{solucion}
+
+\begin{ejemplo}[Uso combinado de multiplicatividad y reciprocidad]
+Calcular $\legs{35}{73}$.
+\end{ejemplo}
+\begin{solucion}
+\textbf{Paso 1: factorizar el numerador.}
+\[
+35 = 5 \cdot 7 \quad\Rightarrow\quad \legs{35}{73} = \legs{5}{73} \legs{7}{73}.
+\]
+
+\textbf{Paso 2: calcular $\legs{5}{73}$.}
+Como $5$ es primo y $73$ es impar, por reciprocidad:
+\[
+\legs{5}{73} = \legs{73}{5} (-1)^{\frac{5-1}{2} \cdot \frac{73-1}{2}}.
+\]
+El exponente es $2 \cdot 36 = 72$, par, así que el signo es $1$:
+\[
+\legs{5}{73} = \legs{73}{5} = \legs{3}{5} \quad (\text{pues } 73 \equiv 3 \!\!\pmod 5).
+\]
+Los residuos cuadráticos módulo $5$ son $1,4$; como $3$ no está, $\legs{3}{5} = -1$. Por tanto $\legs{5}{73} = -1$.
+
+\textbf{Paso 3: calcular $\legs{7}{73}$.}
+Por reciprocidad:
+\[
+\legs{7}{73} = \legs{73}{7} (-1)^{\frac{7-1}{2} \cdot \frac{73-1}{2}}.
+\]
+El exponente es $3 \cdot 36 = 108$, par, así que el signo es $1$:
+\[
+\legs{7}{73} = \legs{73}{7} = \legs{3}{7} \quad (\text{pues } 73 \equiv 3 \!\!\pmod 7).
+\]
+Los residuos cuadráticos módulo $7$ son $1,2,4$; como $3$ no está, $\legs{3}{7} = -1$. Por tanto $\legs{7}{73} = -1$.
+
+\textbf{Paso 4: combinar.}
+\[
+\legs{35}{73} = (-1)\cdot(-1) = 1.
+\]
+\textbf{Conclusión:} $\legs{35}{73} = 1$, es decir, $x^2 \equiv 35 \pmod{73}$ sí tiene solución.
+\end{solucion}
+
+\subsubsection{Primera ley suplementaria de reciprocidad cuadrática}
+
+\begin{teorema}
+Sea $p$ un primo impar. Entonces $-1$ es residuo cuadrático módulo $p$ si y solo si
+\[
+p \equiv 1 \pmod 4.
+\]
+Equivalentemente,
+\[
+\legs{-1}{p} = (-1)^{\frac{p-1}{2}} =
+\begin{cases}
+1 & \text{si } p \equiv 1 \pmod 4, \\
+-1 & \text{si } p \equiv 3 \pmod 4.
+\end{cases}
+\]
+\end{teorema}
+
+\begin{proof}
+Por el teorema de Fermat, $a^{p-1}\equiv 1\pmod p$ para $p \nmid a$, luego
+\[
+\left(a^{\frac{p-1}{2}}-1\right)\left(a^{\frac{p-1}{2}}+1\right)\equiv 0 \pmod p,
+\]
+así que $a^{\frac{p-1}{2}}\equiv \pm 1 \pmod p$.
+
+Si $a$ es residuo cuadrático, existe $x$ tal que $x^2\equiv a\pmod p$. Entonces, por Fermat,
+\[
+a^{\frac{p-1}{2}} \equiv x^{p-1} \equiv 1 \pmod p.
+\]
+Así, todo residuo cuadrático satisface $a^{\frac{p-1}{2}}\equiv 1$.
+
+El polinomio $y^{\frac{p-1}{2}}-1$ tiene a lo sumo $\frac{p-1}{2}$ raíces en $\mathbb{F}_p$. Como hay exactamente $\frac{p-1}{2}$ residuos cuadráticos no nulos, estos agotan todas las raíces. Por lo tanto los no residuos satisfacen $a^{\frac{p-1}{2}}\equiv -1$, lo cual coincide con el criterio de Euler para el símbolo de Legendre.
+
+Tomando $a=-1$: si $p=4k+1$, entonces $\frac{p-1}{2}=2k$ es par y $(-1)^{2k}=1$; si $p=4k+3$, entonces $\frac{p-1}{2}=2k+1$ es impar y $(-1)^{2k+1}=-1$.
+\end{proof}
+
+\noindent\textbf{Ejemplos concretos}
+
+\begin{itemize}
+  \item $p = 5$: $5 \equiv 1 \pmod 4$, así que $\legs{-1}{5} = 1$. En efecto, $2^2 = 4 \equiv -1 \pmod 5$.
+  \item $p = 13$: $13 \equiv 1 \pmod 4$, así que $\legs{-1}{13} = 1$. En efecto, $5^2 = 25 \equiv -1 \pmod{13}$.
+  \item $p = 17$: $17 \equiv 1 \pmod 4$, así que $\legs{-1}{17} = 1$. En efecto, $4^2 = 16 \equiv -1 \pmod{17}$.
+  \item $p = 3$: $3 \equiv 3 \pmod 4$, así que $\legs{-1}{3} = -1$. Los cuadrados módulo $3$ son $\{1\}$; $-1 \equiv 2$ no aparece.
+  \item $p = 7$: $7 \equiv 3 \pmod 4$, así que $\legs{-1}{7} = -1$. Los cuadrados módulo $7$ son $\{1,2,4\}$; $-1 \equiv 6$ no está.
+  \item $p = 11$: $11 \equiv 3 \pmod 4$, así que $\legs{-1}{11} = -1$. Los cuadrados módulo $11$ son $\{1,3,4,5,9\}$; $-1 \equiv 10$ no está.
+\end{itemize}
+
+\subsubsection{Segunda ley suplementaria de reciprocidad cuadrática}
+
+\begin{lema}[Lema de Gauss]
+Sea $p$ un primo impar y $a$ un entero con $p \nmid a$. Para $k = 1, \ldots, \frac{p-1}{2}$, sea $r_k$ el residuo de $ka$ módulo $p$ tomado en el rango $\left(-\frac{p}{2}, \frac{p}{2}\right)$, y sea $\mu$ el número de índices $k$ para los cuales $r_k < 0$. Entonces
+\[
+\legs{a}{p} = (-1)^{\mu}.
+\]
+\end{lema}
+\begin{proof}[Idea de la demostración]
+Los valores absolutos $|r_1|, \ldots, |r_{(p-1)/2}|$ son una permutación de $1, 2, \ldots, \frac{p-1}{2}$. Multiplicando las congruencias $ka \equiv r_k \pmod p$ para todo $k$ se obtiene
+\[
+a^{\frac{p-1}{2}} \left(\frac{p-1}{2}\right)! \equiv (-1)^{\mu} \left(\frac{p-1}{2}\right)! \pmod p,
+\]
+y como $\left(\frac{p-1}{2}\right)!$ es invertible módulo $p$, se sigue $a^{\frac{p-1}{2}} \equiv (-1)^{\mu} \pmod p$. Por el criterio de Euler, $\legs{a}{p} \equiv a^{\frac{p-1}{2}} \pmod p$, y como ambos lados son $\pm 1$, la igualdad es exacta.
+\end{proof}
+
+\begin{teorema}
+Sea $p$ un primo impar. Entonces $2$ es residuo cuadrático módulo $p$ si y solo si
+\[
+p \equiv 1 \pmod 8 \quad \text{o} \quad p \equiv 7 \pmod 8,
+\]
+es decir,
+\[
+\legs{2}{p} = 1 \iff p \equiv \pm 1 \pmod 8.
+\]
+Equivalentemente,
+\[
+\legs{2}{p} = (-1)^{\frac{p^2-1}{8}}.
+\]
+\end{teorema}
+
+\begin{proof}
+Aplicamos el lema de Gauss con $a = 2$. Para $k = 1, \ldots, \frac{p-1}{2}$, el residuo $2k$ ya está en el rango $(0, p)$, así que $r_k = 2k$ si $2k < p/2$, y $r_k = 2k - p$ (negativo) si $2k > p/2$. Por lo tanto $\mu$ es el número de enteros $k$ en $\left\{1, \ldots, \frac{p-1}{2}\right\}$ con $k > \frac{p}{4}$, es decir,
+\[
+\mu = \frac{p-1}{2} - \left\lfloor \frac{p}{4} \right\rfloor.
+\]
+Analizando los cuatro casos posibles de $p \bmod 8$ (recordando que, como $p$ es impar, solo $p \equiv 1,3,5,7 \pmod 8$ son posibles) se calcula la paridad de $\mu$:
+\begin{itemize}
+  \item Si $p \equiv 1 \pmod 8$: $\mu$ es par $\Rightarrow \legs{2}{p} = 1$.
+  \item Si $p \equiv 3 \pmod 8$: $\mu$ es impar $\Rightarrow \legs{2}{p} = -1$.
+  \item Si $p \equiv 5 \pmod 8$: $\mu$ es impar $\Rightarrow \legs{2}{p} = -1$.
+  \item Si $p \equiv 7 \pmod 8$: $\mu$ es par $\Rightarrow \legs{2}{p} = 1$.
+\end{itemize}
+Estos cuatro casos son exactamente los que describe $\legs{2}{p} = (-1)^{\frac{p^2-1}{8}}$, ya que $\frac{p^2-1}{8}$ es par precisamente cuando $p \equiv \pm 1 \pmod 8$.
+\end{proof}
+
+\noindent\textbf{Ejemplos concretos}
+
+\begin{itemize}
+  \item $p = 7$: $7 \equiv 7 \pmod 8$, así que $\legs{2}{7} = 1$. En efecto, $3^2 = 9 \equiv 2 \pmod 7$.
+  \item $p = 17$: $17 \equiv 1 \pmod 8$, así que $\legs{2}{17} = 1$. En efecto, $6^2 = 36 \equiv 2 \pmod{17}$.
+  \item $p = 23$: $23 \equiv 7 \pmod 8$, así que $\legs{2}{23} = 1$. En efecto, $5^2 = 25 \equiv 2 \pmod{23}$.
+  \item $p = 5$: $5 \equiv 5 \pmod 8$, así que $\legs{2}{5} = -1$. Los cuadrados módulo $5$ son $\{1,4\}$; $2$ no aparece.
+  \item $p = 3$: $3 \equiv 3 \pmod 8$, así que $\legs{2}{3} = -1$. Los cuadrados módulo $3$ son $\{1\}$; $2$ no es residuo cuadrático.
+  \item $p = 11$: $11 \equiv 3 \pmod 8$, así que $\legs{2}{11} = -1$. Los cuadrados módulo $11$ son $\{1,3,4,5,9\}$; $2$ no está.
+  \item $p = 13$: $13 \equiv 5 \pmod 8$, así que $\legs{2}{13} = -1$. Los cuadrados módulo $13$ son $\{1,3,4,9,10,12\}$; $2$ no está.
+\end{itemize}
+
+\section{Símbolo de Jacobi}
+
+\begin{definicion}[Símbolo de Jacobi]
+Sea $n$ un entero positivo \textbf{impar}, con factorización en primos (no necesariamente distintos)
+\[
+n=p_1p_2\cdots p_k .
+\]
+Para cualquier entero $a$, el símbolo de Jacobi se define como el producto de símbolos de Legendre:
+\[
+\jac{a}{n}=\legs{a}{p_1}\legs{a}{p_2}\cdots\legs{a}{p_k}.
+\]
+Por convención, $\jac{a}{1}=1$ para todo $a$.
+\end{definicion}
+
+Nótese que el símbolo de Jacobi \textbf{no requiere que $n$ sea primo}; solo que sea impar y positivo. Es, en esencia, una extensión multiplicativa del símbolo de Legendre a denominadores compuestos.
+
+\subsection{Relación con el símbolo de Legendre}
+
+\begin{proposicion}
+Si $n=p$ es primo, entonces el símbolo de Jacobi coincide exactamente con el símbolo de Legendre:
+\[
+\jac{a}{p}=\legs{a}{p}.
+\]
+\end{proposicion}
+\begin{proof}
+Inmediato de la definición, tomando $k=1$ en el producto.
+\end{proof}
+
+\begin{observacion}[La diferencia conceptual clave]\label{obs:peligro}
+Cuando $n$ es compuesto, $\jac{a}{n}=1$ \textbf{no implica} que $a$ sea residuo cuadrático módulo $n$; solo indica que el número de factores primos de $n$ para los cuales $a$ es no residuo es \emph{par}. Esta es la diferencia esencial entre ambos símbolos y se ilustra en el Ejemplo~\ref{ej:peligro}.
+\end{observacion}
+
+\subsection{Propiedades fundamentales}
+
+En toda esta sección $m,n$ denotan enteros positivos impares y $a,b$ enteros arbitrarios.
+
+\subsubsection{Valor cero y buena definición}
+
+\begin{teorema}\label{t1}
+$\jac{a}{n}\in\{-1,0,1\}$. Además, $\jac{a}{n}=0$ si y solo si $\gcd(a,n)>1$; y si $\gcd(a,n)=1$, entonces $\jac{a}{n}=\pm1$.
+\end{teorema}
+\begin{proof}
+Sea $n=p_1\cdots p_k$. Por definición $\jac{a}{n}=\prod_i \legs{a}{p_i}$, producto de símbolos de Legendre, cada uno en $\{-1,0,1\}$. Si $\gcd(a,n)>1$, entonces algún primo $p_i$ divide a $a$, luego $\legs{a}{p_i}=0$ y el producto entero es $0$. Recíprocamente, si $\gcd(a,n)=1$ ningún $p_i$ divide a $a$, así que cada factor vale $\pm1$ y el producto es $\pm1$.
+\end{proof}
+
+\begin{ejemplo}
+Sea $n=45=3^2\cdot5$ y $a=6$. Como $\gcd(6,45)=3>1$, se tiene $\jac{6}{45}=0$ sin necesidad de más cálculo: basta notar que $3\mid 6$ y $3\mid 45$.
+\end{ejemplo}
+
+\subsubsection{Multiplicatividad en el numerador}
+
+\begin{teorema}\label{t2}
+Para todo $a,b\in\mathbb{Z}$ y $n$ impar positivo,
+\[
+\jac{ab}{n}=\jac{a}{n}\jac{b}{n}.
+\]
+\end{teorema}
+\begin{proof}
+Sea $n=p_1\cdots p_k$. El símbolo de Legendre es multiplicativo en el numerador (consecuencia directa del criterio de Euler: $\legs{ab}{p}\equiv(ab)^{(p-1)/2}=a^{(p-1)/2}b^{(p-1)/2}\equiv\legs{a}{p}\legs{b}{p}\pmod p$, y como ambos lados están en $\{-1,0,1\}$ la congruencia implica igualdad). Entonces
+\[
+\jac{ab}{n}=\prod_{i=1}^k\legs{ab}{p_i}=\prod_{i=1}^k\legs{a}{p_i}\legs{b}{p_i}=\left(\prod_{i=1}^k\legs{a}{p_i}\right)\left(\prod_{i=1}^k\legs{b}{p_i}\right)=\jac{a}{n}\jac{b}{n}. \qedhere
+\]
+\end{proof}
+
+\begin{ejemplo}
+Calculemos $\jac{12}{7}$ usando la multiplicatividad:
+\[\jac{12}{7}=\jac{4}{7}\jac{3}{7}=\jac{2}{7}^2\jac{3}{7}=1\cdot\jac{3}{7}.\]
+Como $3\equiv3\pmod4$ y $7\equiv3\pmod4$, por reciprocidad:
+\[\jac{3}{7}=-\jac{7}{3}=-\jac{1}{3}=-1.\]
+Así $\jac{12}{7}=-1$.
+\end{ejemplo}
+
+\subsubsection{Multiplicatividad en el denominador}
+
+\begin{teorema}\label{t3}
+Para $m,n$ impares positivos y $a\in\mathbb{Z}$,
+\[
+\jac{a}{mn}=\jac{a}{m}\jac{a}{n}.
+\]
+\end{teorema}
+\begin{proof}
+Si $m=p_1\cdots p_r$ y $n=q_1\cdots q_s$ son las factorizaciones en primos, entonces $mn=p_1\cdots p_r q_1\cdots q_s$ es la factorización de $mn$. Por definición,
+\[
+\jac{a}{mn}=\prod_{i=1}^r\legs{a}{p_i}\cdot\prod_{j=1}^s\legs{a}{q_j}=\jac{a}{m}\jac{a}{n}. \qedhere
+\]
+\end{proof}
+
+\begin{ejemplo}
+$\jac{2}{45}=\jac{2}{9}\jac{2}{5}$. Como $9=3^2$, $\jac{2}{9}=\legs{2}{3}^2=(-1)^2=1$. Y $5\equiv5\pmod8$ da $\legs{2}{5}=-1$. Luego $\jac{2}{45}=1\cdot(-1)=-1$.
+\end{ejemplo}
+
+\subsubsection{Periodicidad módulo $n$}
+
+\begin{teorema}\label{t4}
+Si $a\equiv b\pmod n$, entonces $\jac{a}{n}=\jac{b}{n}$.
+\end{teorema}
+\begin{proof}
+Sea $n=p_1\cdots p_k$. Como $a\equiv b\pmod n$ y cada $p_i\mid n$, se tiene $a\equiv b\pmod{p_i}$ para todo $i$. El símbolo de Legendre depende solo de la clase de $a$ módulo $p_i$ (pues ser residuo cuadrático es una propiedad de la clase módulo $p_i$), así que $\legs{a}{p_i}=\legs{b}{p_i}$ para cada $i$. Tomando el producto, $\jac{a}{n}=\jac{b}{n}$.
+\end{proof}
+
+\begin{ejemplo}
+$\jac{17}{21}=\jac{-4}{21}$ ya que $17\equiv-4\pmod{21}$. Esto simplifica el cálculo: $\jac{-4}{21}=\jac{-1}{21}\jac{4}{21}=\jac{-1}{21}\cdot1$. Como $21\equiv1\pmod4$, $\jac{-1}{21}=1$. Luego $\jac{17}{21}=1$.
+\end{ejemplo}
+
+\subsubsection{El valor de $\jac{-1}{n}$}
+
+\begin{teorema}\label{t5}
+Para $n$ impar positivo,
+\[
+\jac{-1}{n}=(-1)^{(n-1)/2}=
+\begin{cases}
+1 & \text{si } n\equiv1\pmod4,\\
+-1 & \text{si } n\equiv3\pmod4.
+\end{cases}
+\]
+\end{teorema}
+\begin{proof}
+Sea $n=p_1\cdots p_k$. Por la fórmula complementaria para Legendre, $\legs{-1}{p_i}=(-1)^{(p_i-1)/2}$. Entonces
+\[
+\jac{-1}{n}=\prod_{i=1}^k(-1)^{(p_i-1)/2}=(-1)^{\sum_i (p_i-1)/2}.
+\]
+Basta probar que $\sum_i\frac{p_i-1}{2}\equiv\frac{n-1}{2}\pmod 2$. Esto se sigue del siguiente lema, aplicado repetidamente:
+\end{proof}
+
+\begin{lema}\label{lema-aditivo}
+Si $u,v$ son enteros impares, entonces
+\[
+\frac{uv-1}{2}\equiv\frac{u-1}{2}+\frac{v-1}{2}\pmod 2.
+\]
+\end{lema}
+\begin{proof}
+Escribamos $u=2s+1$, $v=2t+1$. Entonces
+\[
+uv-1=4st+2s+2t=2(2st+s+t),\quad\text{luego } \frac{uv-1}{2}=2st+s+t.
+\]
+Por otro lado $\dfrac{u-1}{2}+\dfrac{v-1}{2}=s+t$. La diferencia es $2st$, que es par, de modo que ambas expresiones son congruentes módulo $2$.
+\end{proof}
+
+Aplicando el Lema~\ref{lema-aditivo} inductivamente a $n=p_1(p_2\cdots p_k)$, se obtiene $\frac{n-1}{2}\equiv\frac{p_1-1}{2}+\frac{p_2\cdots p_k-1}{2}\pmod2$, y repitiendo se llega a $\frac{n-1}{2}\equiv\sum_i\frac{p_i-1}{2}\pmod2$, lo que completa la demostración del Teorema~\ref{t5}.
+
+\begin{ejemplo}
+$\jac{-1}{21}$: como $21\equiv1\pmod4$, el teorema da directamente $\jac{-1}{21}=1$, sin necesidad de factorizar $21=3\cdot7$ ni de calcular $\legs{-1}{3}\legs{-1}{7}=(-1)(-1)=1$.
+\end{ejemplo}
+
+\subsubsection{El valor de $\jac{2}{n}$}
+
+\begin{teorema}\label{t6}
+Para $n$ impar positivo,
+\[
+\jac{2}{n}=(-1)^{(n^2-1)/8}=
+\begin{cases}
+1 & \text{si } n\equiv\pm1\pmod8,\\
+-1 & \text{si } n\equiv\pm3\pmod8.
+\end{cases}
+\]
+\end{teorema}
+\begin{proof}
+Análoga a la del Teorema~\ref{t5}, usando ahora la fórmula complementaria $\legs{2}{p_i}=(-1)^{(p_i^2-1)/8}$ y el siguiente lema aditivo (análogo al Lema~\ref{lema-aditivo} pero módulo $8$):
+
+\emph{Lema.} Si $u,v$ son impares, $\dfrac{u^2v^2-1}{8}\equiv\dfrac{u^2-1}{8}+\dfrac{v^2-1}{8}\pmod2$.
+
+\emph{Demostración del lema.} Sea $u^2=8\alpha+1$, $v^2=8\beta+1$ (válido pues el cuadrado de un impar es $\equiv1\pmod8$). Entonces
+\[
+u^2v^2=(8\alpha+1)(8\beta+1)=64\alpha\beta+8\alpha+8\beta+1,\quad\text{así } \frac{u^2v^2-1}{8}=8\alpha\beta+\alpha+\beta.
+\]
+Y $\dfrac{u^2-1}{8}+\dfrac{v^2-1}{8}=\alpha+\beta$. La diferencia, $8\alpha\beta$, es par. $\blacksquare$
+
+Aplicando este lema inductivamente a la factorización $n=p_1\cdots p_k$ igual que antes, se concluye $\dfrac{n^2-1}{8}\equiv\sum_i\dfrac{p_i^2-1}{8}\pmod2$, de donde
+\[
+\jac{2}{n}=\prod_i\legs{2}{p_i}=\prod_i(-1)^{(p_i^2-1)/8}=(-1)^{\sum_i(p_i^2-1)/8}=(-1)^{(n^2-1)/8}. \qedhere
+\]
+\end{proof}
+
+\begin{ejemplo}
+$\jac{2}{63}$: $63=9\cdot7\equiv7\pmod8$, es decir $63\equiv-1\pmod8$, así que $\jac{2}{63}=1$ directamente, sin factorizar $63=3^2\cdot7$.
+\end{ejemplo}
+
+\subsubsection{Ley de reciprocidad cuadrática de Jacobi}
+
+\begin{teorema}[Reciprocidad cuadrática generalizada]\label{t7}
+Si $m,n$ son enteros positivos impares con $\gcd(m,n)=1$, entonces
+\[
+\jac{m}{n}\jac{n}{m}=(-1)^{\frac{m-1}{2}\cdot\frac{n-1}{2}}.
+\]
+Equivalentemente, $\jac{m}{n}=\jac{n}{m}$ salvo cuando $m\equiv n\equiv3\pmod4$, en cuyo caso $\jac{m}{n}=-\jac{n}{m}$.
+\end{teorema}
+\begin{proof}
+Sea $m=p_1\cdots p_r$, $n=q_1\cdots q_s$ las factorizaciones en primos (posiblemente repetidos). Como $\gcd(m,n)=1$, ningún $p_i$ coincide con ningún $q_j$, de modo que la ley de reciprocidad cuadrática clásica de Legendre se aplica a cada par $(p_i,q_j)$:
+\[
+\legs{p_i}{q_j}\legs{q_j}{p_i}=(-1)^{\frac{p_i-1}{2}\cdot\frac{q_j-1}{2}}.
+\]
+Por definición del símbolo de Jacobi,
+\[
+\jac{m}{n}\jac{n}{m}=\prod_{i=1}^r\prod_{j=1}^s\legs{p_i}{q_j}\cdot\prod_{j=1}^s\prod_{i=1}^r\legs{q_j}{p_i}=\prod_{i,j}\legs{p_i}{q_j}\legs{q_j}{p_i}=\prod_{i,j}(-1)^{\frac{p_i-1}{2}\cdot\frac{q_j-1}{2}}.
+\]
+El exponente total es
+\[
+\sum_{i=1}^r\sum_{j=1}^s\frac{p_i-1}{2}\cdot\frac{q_j-1}{2}=\left(\sum_{i=1}^r\frac{p_i-1}{2}\right)\left(\sum_{j=1}^s\frac{q_j-1}{2}\right).
+\]
+Por el Lema~\ref{lema-aditivo} (aplicado como en la prueba del Teorema~\ref{t5}), $\sum_i\frac{p_i-1}{2}\equiv\frac{m-1}{2}\pmod2$ y $\sum_j\frac{q_j-1}{2}\equiv\frac{n-1}{2}\pmod2$. Como el signo $(-1)^{(\cdot)}$ solo depende de la paridad del exponente, se sigue que
+\[
+\jac{m}{n}\jac{n}{m}=(-1)^{\frac{m-1}{2}\cdot\frac{n-1}{2}}. \qedhere
+\]
+\end{proof}
+
+\begin{ejemplo}
+Sean $m=15$, $n=7$ (coprimos). Como $15\equiv3\pmod4$ y $7\equiv3\pmod4$, el teorema predice $\jac{15}{7}\jac{7}{15}=-1$. En efecto: $\jac{15}{7}=\jac{1}{7}=1$ (pues $15\equiv1\pmod7$); y $\jac{7}{15}=\jac{7}{3}\jac{7}{5}=\jac{1}{3}\jac{2}{5}=1\cdot(-1)=-1$. El producto es $1\cdot(-1)=-1$, como predice la fórmula.
+\end{ejemplo}
+
+\begin{corolario}[Advertencia sobre residuos cuadráticos]\label{cor-peligro}
+Si $n$ es compuesto, $\jac{a}{n}=1$ no garantiza que $a$ sea residuo cuadrático módulo $n$.
+\end{corolario}
+\begin{proof}
+Se sigue de la Observación~\ref{obs:peligro}: el símbolo de Jacobi es el producto de los símbolos de Legendre de los factores primos, así que $\jac{a}{n}=1$ ocurre tanto si $a$ es residuo cuadrático módulo \emph{todos} los factores primos, como si es no residuo módulo un número \emph{par} de ellos. Basta un contraejemplo para confirmar que la segunda situación realmente ocurre (véase el Ejemplo~\ref{ej:peligro}).
+\end{proof}
+
+\subsection{Un algoritmo eficiente}\label{sec:jacobi-alg}
+
+Las propiedades anteriores permiten calcular $\jac{a}{n}$ en tiempo polinomial \textbf{sin factorizar ni $a$ ni $n$}, mediante el siguiente procedimiento recursivo:
+
+\begin{enumerate}[label=(\arabic*)]
+\item Reducir $a\bmod n$ (Teorema~\ref{t4}).
+\item Extraer todos los factores $2$ de $a$: si $a=2^{e}a'$ con $a'$ impar, usar $\jac{2^{e}}{n}=\jac{2}{n}^{e}$ (Teorema~\ref{t2} y \ref{t6}).
+\item Si $a'=1$, terminar. Si no, aplicar reciprocidad (Teorema~\ref{t7}) para invertir $\jac{a'}{n}$ en $\pm\jac{n}{a'}$, según $a'\equiv n\equiv3\pmod4$ o no.
+\item Repetir desde (1) intercambiando los papeles de numerador y denominador (como en el algoritmo de Euclides para el máximo común divisor).
+\end{enumerate}
+
+Esta es precisamente la ventaja computacional del símbolo de Jacobi frente al de Legendre, que se ilustra en la sección siguiente.
+
+\subsection{Ejemplos comparativos: Legendre vs.\ Jacobi}
+
+\subsubsection{Ejemplo 1: cálculo de $\jac{1001}{9907}$}
+
+El número $9907$ es primo, así que $\legs{1001}{9907}=\jac{1001}{9907}$: ambos símbolos coinciden en valor, pero el \emph{camino de cálculo} difiere notablemente.
+
+\paragraph{Método 1 (vía Legendre, factorizando el numerador).}
+Como $1001=7\cdot11\cdot13$, por multiplicatividad
+\[
+\legs{1001}{9907}=\legs{7}{9907}\legs{11}{9907}\legs{13}{9907}.
+\]
+Cada factor exige aplicar reciprocidad cuadrática por separado (con $9907$ primo, cada símbolo se invierte y se reduce módulo el primo pequeño correspondiente):
+\[
+\legs{7}{9907}=-1,\qquad \legs{11}{9907}=1,\qquad \legs{13}{9907}=1,
+\]
+de donde $\legs{1001}{9907}=(-1)(1)(1)=-1$. Este camino \textbf{requiere conocer de antemano la factorización $1001=7\cdot11\cdot13$}, y tres aplicaciones independientes de la reciprocidad cuadrática (una por cada primo).
+
+\paragraph{Método 2 (vía Jacobi, sin factorizar).}
+Aplicando el algoritmo de la sección anterior directamente a $\jac{1001}{9907}$, \textbf{tratando a $1001$ como un entero impar cualquiera, sin factorizarlo}:
+\begin{align*}
+\jac{1001}{9907} &= \jac{9907}{1001} & &(1001\equiv1\bmod4,\text{ signo }+1)\\
+&= \jac{898}{1001} & &(9907 \bmod 1001 = 898)\\
+&= \jac{2}{1001}\,\jac{449}{1001} & &(898=2\cdot449)\\
+&= 1\cdot\jac{449}{1001} & &(1001\equiv1\bmod8 \Rightarrow \jac{2}{1001}=1)\\
+&= \jac{1001}{449} & &(449\equiv1\bmod4,\text{ signo }+1)\\
+&= \jac{103}{449} & &(1001 \bmod 449 = 103)\\
+&= \jac{449}{103} & &(103\equiv3,\ 449\equiv1\bmod4,\text{ signo }+1)\\
+&= \jac{37}{103} & &(449 \bmod 103 = 37)\\
+&= \jac{103}{37} & &(37\equiv1\bmod4,\text{ signo }+1)\\
+&= \jac{29}{37} & &(103 \bmod 37 = 29)\\
+&= \jac{37}{29} & &(29\equiv1\bmod4,\text{ signo }+1)\\
+&= \jac{8}{29} & &(37 \bmod 29 = 8)\\
+&= \jac{2}{29}^3 & &(8=2^3)\\
+&= (-1)^3=-1 & &(29\equiv5\bmod8 \Rightarrow \jac{2}{29}=-1).
+\end{align*}
+Resultado: $\jac{1001}{9907}=-1$, coincidente con el Método 1. Aquí \textbf{nunca hizo falta factorizar $1001$, $898$, $449$, $103$, $37$ ni $29$}; el proceso es idéntico en estructura al algoritmo de Euclides para el máximo común divisor, y por tanto se ejecuta en tiempo polinomial ($O(\log^2 n)$ operaciones aritméticas), igual de rápido que calcular $\gcd(1001,9907)$.
+
+\subsubsection{Ejemplo 2: $\jac{2}{15}$ y la advertencia del Corolario~\ref{cor-peligro}}\label{ej:peligro}
+
+Aquí $15=3\cdot5$ es compuesto, de modo que \textbf{no existe} un símbolo de Legendre $\legs{2}{15}$ (Legendre exige denominador primo). Solo el símbolo de Jacobi está definido:
+\[
+\jac{2}{15}=\legs{2}{3}\legs{2}{5}=(-1)(-1)=1.
+\]
+Comparemos con la realidad de los residuos cuadráticos módulo $15$. Los cuadrados módulo $15$ son
+\[
+\{0^2,1^2,\dots,14^2\}\bmod 15=\{0,1,4,9,1,10,6,4,4,6,10,1,9,4,1\}=\{0,1,4,6,9,10\}.
+\]
+Como $2\notin\{0,1,4,6,9,10\}$, \textbf{$2$ no es residuo cuadrático módulo $15$}, a pesar de que $\jac{2}{15}=1$. Esto confirma el Corolario~\ref{cor-peligro}: $2$ es no residuo módulo $3$ \emph{y} no residuo módulo $5$ (dos fallos que se cancelan en el producto, dando $+1$ engañosamente).
+
+Esta es la limitación central del símbolo de Jacobi: es una herramienta \emph{aritmética} extremadamente eficiente, pero deja de ser un indicador fiel de residuo cuadrático en cuanto el denominador es compuesto.
+
+\subsubsection{Ejemplo 3: comparación de costo cuando el denominador es primo grande}
+
+Sea $p=100003$ (primo) y consideremos $a=5544=2^3\cdot3^2\cdot7\cdot11$.
+
+\paragraph{Vía Legendre.} Habría que calcular $\legs{2}{p}^3\legs{3}{p}^2\legs{7}{p}\legs{11}{p}=\legs{2}{p}\legs{7}{p}\legs{11}{p}$ (los exponentes pares se cancelan), lo cual exige \emph{conocer la factorización completa de $5544$} y aplicar reciprocidad tres veces, una por cada primo impar distinto.
+
+\paragraph{Vía Jacobi.} Se aplica el algoritmo de la Sección~\ref{sec:jacobi-alg} directamente a $\jac{5544}{100003}$, sin factorizar $5544$ en absoluto:
+\begin{enumerate}
+\item Extraer potencias de 2 de $5544$, como $5544=2^3\cdot 693$:
+\[
+\jac{5544}{100003}=\jac{2}{100003}^3 \cdot \jac{693}{100003}.
+\]
+Como $5544 \equiv 3 \pmod{8}$... en realidad basta el módulo de $100003$: $100003 \equiv 3 \pmod 8$, así que $\jac{2}{100003}=-1$, por lo que:
+\[
+\jac{2}{100003}^3 =-1.
+\]
+\item Reciprocidad con $693$. Como $(693-1)/2$ es par, no hay cambio de signo:
+\[
+\jac{693}{100003}=\jac{100003}{693}.
+\]
+Reducimos $100003 \bmod 693 = 211$, así que $\jac{100003}{693}=\jac{211}{693}$.
+\item Reciprocidad con $211$. Como $(211-1)/2$ es impar y $(693-1)/2$ es par, no hay cambio de signo:
+\[
+\jac{211}{693}=\jac{693}{211}.
+\]
+Reducimos $693=211 \cdot 3 +60$, así que $\jac{693}{211}=\jac{60}{211}$.
+\item Extraemos las potencias de 2: $60= 2^2 \cdot 15$. El cuadrado vale $1$ sin importar el valor, quedando solo $\jac{15}{211}$.
+\item Reciprocidad con $15$ y $211$. Como $(15-1)/2$ es impar y $(211-1)/2$ es impar, se produce un cambio de signo:
+\[
+\jac{15}{211}=-\jac{211}{15}.
+\]
+Reduciendo $211=15 \cdot 14 +1$ se tiene $-\jac{1}{15}=-1$.
+\item Regresar por la cadena:
+\[
+\jac{15}{211}=-1 \Rightarrow \jac{60}{211} =-1 \Rightarrow \jac{693}{211}=-1
+ \Rightarrow \jac{211}{693} =-1  \Rightarrow \jac{693}{100003}=-1.
+\]
+Ahora, para el resultado final, no hay que olvidar el signo de la primera extracción de potencias de 2:
+\[
+\jac{5544}{100003}=-\jac{693}{100003} = 1.
+\]
+\end{enumerate}
+
+\begin{observacion}
+Se recuerda que cuando el numerador es par se extraen todos los factores de $2$ (Teorema~\ref{t6}). Cuando es impar, se aplica la reciprocidad cuadrática, invirtiendo el signo cuando ambos son $\equiv 3\pmod4$.
+\end{observacion}
+
+\paragraph{Conclusión de la comparación.} Cuando el numerador es difícil de factorizar (algo típico en criptografía, por ejemplo en pruebas de primalidad de Solovay--Strassen), el símbolo de Jacobi es indispensable: permite decidir el signo $\pm1$ en tiempo polinomial sin resolver el problema difícil de factorizar. El símbolo de Legendre, en cambio, solo tiene sentido con denominador primo y su cálculo práctico mediante reciprocidad clásica se apoya, en general, en la factorización previa del numerador.
+
+\subsection{Programa para calcular el símbolo de Jacobi}
+\begin{verbatim}
+"""
+Calculo del simbolo de Jacobi (a/n).
+Codigo generado por la claude.ia
+
+Implementa el algoritmo eficiente basado en:
+  - periodicidad:            (a/n) = (a mod n / n)
+  - extraccion de factores 2: (2/n) = (-1)^((n^2-1)/8)
+  - reciprocidad cuadratica:  (m/n) = (-1)^((m-1)/2 * (n-1)/2) * (n/m)
+
+No requiere factorizar ni el numerador ni el denominador: el proceso es
+analogo en estructura al algoritmo de Euclides para el mcd, por lo que se
+ejecuta en tiempo polinomial O(log^2 n).
+"""
+
+
+def simbolo_jacobi(a, n):
+    """Calcula el simbolo de Jacobi (a/n).
+
+    Requiere que n sea un entero positivo impar. Devuelve -1, 0 o 1.
+    """
+    if n <= 0 or n % 2 == 0:
+        raise ValueError("n debe ser un entero positivo impar")
+
+    a = a % n
+    resultado = 1
+
+    while a != 0:
+        # 1) extraer todos los factores de 2 de a
+        while a % 2 == 0:
+            a //= 2
+            if n % 8 in (3, 5):
+                resultado = -resultado
+
+        # 2) reciprocidad cuadratica: intercambiar numerador y denominador
+        a, n = n, a
+        if a % 4 == 3 and n % 4 == 3:
+            resultado = -resultado
+
+        # 3) reducir el nuevo numerador modulo el nuevo denominador
+        a = a % n
+
+    return resultado if n == 1 else 0
+
+
+def simbolo_legendre_fuerza_bruta(a, p):
+    """Calcula (a/p) por definicion, probando todos los residuos (solo para p primo).
+
+    Sirve para verificar simbolo_jacobi() en casos donde n es primo.
+    """
+    a = a % p
+    if a == 0:
+        return 0
+    residuos_cuadraticos = {(x * x) % p for x in range(1, p)}
+    return 1 if a in residuos_cuadraticos else -1
+
+
+if __name__ == "__main__":
+    # ejemplos del documento
+    casos = [
+        (17, 5),      # (17/5) = -1
+        (6, 7),       # (6/7) = -1
+        (18, 31),     # (18/31) = 1
+        (-10, 23),    # (-10/23) = 1
+        (35, 73),     # (35/73) = 1
+        (13, 17),     # (13/17) = 1
+        (7, 19),      # (7/19) = 1
+        (12, 7),      # (12/7) = -1
+        (1001, 9907),  # (1001/9907) = -1, denominador primo grande
+        (2, 15),      # (2/15) = 1  aunque 2 NO es residuo cuadratico mod 15
+        (6, 45),      # (6/45) = 0  porque gcd(6, 45) = 3
+        (5544, 100003),  # (5544/100003) = 1
+    ]
+
+    print(f"{'(a/n)':>12} | {'jacobi':>7}")
+    print("-" * 24)
+    for a, n in casos:
+        print(f"({a:>5}/{n:<5}) | {simbolo_jacobi(a, n):>7}")
+
+    # Verificacion cruzada con el simbolo de Legendre cuando n es primo
+    for a, p in [(17, 5), (6, 7), (13, 17), (1001, 9907)]:
+        j = simbolo_jacobi(a, p)
+        l = simbolo_legendre_fuerza_bruta(a, p)
+        estado = "OK" if j == l else "DIFERENCIA"
+        print(f"Verificacion Legendre vs Jacobi para ({a}/{p}): {j} vs {l} -> {estado}")
+
+\end{verbatim}
+\subsection{Resumen comparativo}
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+& \textbf{Símbolo de Legendre } $\legs{a}{p}$ & \textbf{Símbolo de Jacobi } $\jac{a}{n}$\\
+\hline
+Denominador & primo impar $p$ & impar positivo $n$ cualquiera\\
+\hline
+Interpretación cuando vale $1$ & $a$ es residuo cuadrático mod $p$ & no garantiza residuo cuadrático\\
+\hline
+Requiere factorizar el numerador & sí, en la práctica & no\\
+\hline
+Uso típico & teoría de números pura & algoritmos (Solovay--Strassen, cálculo rápido)\\
+\hline
+\end{tabular}
+\end{center}

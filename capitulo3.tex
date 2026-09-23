@@ -1,0 +1,582 @@
+\chapter{Algoritmos Probabilísticos de Primalidad}
+Para determinar si un numero es primo existen los métodos deterministas y los probabilísticos. Los métodos deterministas prueban en forma precisa si un número es primo, en cambio los métodos probabilísticos, utilizando menos recursos, indican que un número puede ser primo o no con una cierta probabilidad. \cite{rempegillen2014primality} \cite{Rosen2019} \cite{smart2016cryptography}. \\
+Sin embargo, en casos concretos (como Miller-Rabin con varias rondas, en un escenario general), la probabilidad de error es tan pequeña que, para graficar la potencia de estos algoritmos, sin exageración se dice que es más probable que un neutrino proveniente del sol haga un bit flip, es decir, cambie los datos en la computadora donde se hacen los cálculos a que el algoritmo yerre.\\
+
+En términos alegóricos, es como si el número $n$ sea objeto de un juicio que determina si es compuesto o primo.
+Y asisten al juicio testigos (honestos) $a$ que testifican que $n$ es compuesto cuando lo es; testigos honestos $a$ que testifican que $n$ es primo cuando lo es; y testigos mentirosos llamados simplemente mentirosos, que testifican que $a$ es primo, cuando eso no es cierto. \\
+El juez (el algoritmo) tiene una especie de poder, sabe que un testigo $a$ es honesto cuando dice que $n$ es compuesto, pero -dependiendo del -algoritmo- tiene pocas herramientas cuando $a$ dice que $n$ es primo.\\
+
+Dado que es muy sencillo determinar si un número $n=2$, en cuyo caso es primo, o si es par con $n>2$, en cuyo caso es compuesto, supondremos que $n$ es impar y que $n>1$.
+
+\section{Test de Fermat}
+En base al Pequeño Teorema de Fermat (Enunciado~\ref{enun:teorFermat}), se presenta un algoritmo que ejemplifica la naturaleza de los algoritmos probabilísticos para primalidad. \\
+En estricto rigor el \textit{test de Fermat} no es exactamente un test, en el sentido de que puede ofrecer respuestas incorrectas con una probabilidad de 1 (incluso si se hacen varias rondas), es decir, puede cometer groseros errores con certeza. \\
+El algoritmo dice que un número es compuesto cuando es compuesto con absoluta precisión. \\
+Para muchos primos dice que es probablemente primo, con un error prácticamente despreciable.
+Pero existen números para los cuales dice que es probablemente primo (indicando incluso una probabilidad muy pequeña de error), cuando tales números son compuestos. \\
+Se dice que es un algoritmo probabilístico utilizado para determinar si un número entero positivo dado como entrada es compuesto o 'probablemente' primo. Aunque ya advertimos de sus limitaciones y el riesgo de decir que es un test (completo). \\
+
+En base al criterio de Fermat -Enunciado~\ref{enun:criterioFermat}- y a la discusión sobre los rangos luego de tal enunciado, a continuación se explica el funcionamiento del algoritmo. \\
+Para analizar la primalidad de un número impar $n>1$:
+\begin{enumerate}
+\item Elegir una base: Se selecciona un número entero aleatorio $a$ coprimo con $n$ en el intervalo $[2, n-2]$.
+\item Calcular la potencia modular: Se calcula $a^{n-1} \mod n$ utilizando métodos como la exponenciación modular rápida que se puede realizar en tiempo polinomial ($O(\log n)$).
+\item Verificar el resultado:
+    \begin{itemize}
+    \item  Si el resultado no es 1, entonces $n$ es definitivamente compuesto. En este caso, $a$ es un testigo de que $n$ es compuesto.
+    \item Si el resultado es 1, entonces $n$ se considera un primo probable. No es una prueba definitiva, ya que $n$ podría ser un número compuesto que se comporta como un primo para ese entero $a$ específico, en cuyo caso $a$ es un (testigo) mentiroso.
+    \end{itemize}
+\end{enumerate}
+
+La idea se implementa en el Algoritmo~\ref{alg:AlgFermat}.
+
+\begin{lstlisting}[caption={Test de Fermat}, label={alg:AlgFermat}, mathescape=true]
+# Entrada: n
+# Salida: "primo probable" cuando n es probablemente primo
+          "compuesto" cuando n es compuesto
+
+Elegir al azar un numero $a$, $2 \leq a \leq n-2$
+if $a^{n-1} \not\equiv 1 \pmod n$:
+   print($n$ es compuesto)
+else:
+   print($n$ es primo probable)
+\end{lstlisting}
+
+\begin{ejemplo} 
+ Sea $n=91$. \\
+ Si elegimos $a=3$: $3^{90} \equiv 1 \pmod {91}$, luego $a=3$ es un mentiroso, dice que $91$ es primo probable (aunque 91 es compuesto). \\
+ Si elegimos $a=5$: $5^{90} \equiv 64 \pmod {91}$, es decir, $5^{90} \not\equiv 1 \pmod {91}$, luego $a=5$ es un testigo de que $91$ es compuesto. \\
+ En efecto, $91=7 \cdot 13$.
+\end{ejemplo}
+
+En el análisis de probabilidades es cuando el lema de los testigos de Fermat -Enunciado~\ref{enun:lematestigosFermat}- adquiere su importancia. \\
+Dicho enunciado prueba que, \textbf{si hay un testigo} $a$ coprimo con n de que $n$ es compuesto entonces por lo menos la mitad de los enteros $a$ coprimos con n en el rango $2 \leq a \leq N-2$ son testigos de que $n$ es compuesto. \\
+Si nos tomamos la licencia de añadir los testigos triviales (Enunciado~\ref{enun:testigostriviales}), entonces por lo menos la mitad de los enteros $a$ en el rango son testigos. 
+Visto así, si usamos 'prob' como una abreviación de probabilidad, luego de elegir $a$: \\
+
+prob(imprimir primo (probable), cuando $n$ es primo) = 1.  \\
+prob(imprimir primo (probable), cuando $n$ es compuesto) $\leq \frac{1}{2}$. \quad (esto es un error)\\
+
+Podemos reducir la probabilidad de error, repitiendo el procedimiento, es decir, seguir eligiendo números $a$.\\
+
+Una presentación del nuevo Algoritmo~\ref{alg:Alg2Fermat} es esta:
+
+\begin{lstlisting}[caption={Test de Fermat con repetición}, label={alg:Alg2Fermat}, mathescape=true]
+# Entrada: n
+# Salida: "primo probable" cuando n es probablemente primo
+          "compuesto" cuando n es compuesto
+
+Elegir al azar $k$ numeros $a_i$, $2 \leq a_i \leq n-2$, es decir, $2 \leq a_1, \ldots, a_k \leq n-2$
+if $\exists a_i \quad a_i^{n-1} \not\equiv 1 \pmod n$:
+   print($n$ es compuesto)
+else:
+   print($n$ es primo probable)
+\end{lstlisting}
+
+En virtud a la repetición: \\
+
+prob(imprimir primo (probable), cuando $n$ es primo) = 1 \\
+prob(imprimir primo (probable), cuando $n$ es compuesto) $\leq \frac{1}{2^k}$. \\
+
+Nótese que cuando $k$ crece, la probabilidad de error tiende a ser muy pequeña. \\
+Ello grafica bien la idea de un algoritmo probabilístico. \\
+Lamentablemente sólo es un algoritmo didáctico para ese propósito. En efecto, el pequeño teorema de Fermat y el criterio de Fermat, y por consiguiente el lema de los testigos de Fermat son condicionales, no bicondicionales. Funcionan bien \textbf{si hay un testigo} $a$ de que $n$ es compuesto. \\
+
+Un gran inconveniente del test de Fermat es la existencia de pseudoprimos, es decir, números que el algoritmo dice que son primos probables cuando en realidad son compuestos. \\
+En sentido relajado, estos números compuestos (pseudoprimos) satisfacen la congruencia del pequeño teorema de Fermat para un entero $a$ determinado ($a^{n-1} \equiv 1 \pmod n$), es decir, para un entero $a$ mentiroso. \\Capitulo II Algoritmos Determinísticos de Primalidad
+Los números de Carmichael son pseudoprimos en un sentido más estricto y severo (otra denominación es pseudoprimo absoluto). Son números compuestos que son pseudoprimos para todos los enteros $a$, es decir, $a^{n-1} \equiv 1 \pmod n$ para todo $a$ coprimo con $n$ en el rango. \\ 
+Debido a ellos, el test de Fermat no es un test de primalidad probabilístico perfecto, ya que no se puede reducir la probabilidad de error simplemente aumentando el número de enteros $a$ elegidos si el número es de Carmichael. \\
+El número de Carmichael más pequeño es $561 = 3 \cdot 11 \cdot 17$. El lector puede comprobarlo con cualquier entero $a$ coprimo con $n$ en el rango. Hay infinitos número de Carmichael. \\
+
+En la práctica, el test de Fermat puede utilizarse como un primer filtro rápido para descartar números claramente compuestos antes de aplicar pruebas más rigurosas como el test de Miller-Rabin, el cual soluciona el problema de los números de Carmichael. \\
+En la teoría, su utilidad para graficar la estructura de un algoritmo probabilístico es innegable.
+
+\section{Test de Miller-Rabin}
+Miller-Rabin es el algoritmo probabilístico más utilizado en la práctica para determinar la primalidad de un número entero impar $n$. \\
+
+En base al criterio de Miller-Rabin -Enunciado~\ref{enun:criterioRabin}-, presentamos primero un ejemplo.
+
+\begin{ejemplo} \, \\
+\textbf{Con} $\boldsymbol{n=15}$. \\
+$x^2 \equiv 1 \pmod {15}$ tiene raíces triviales $x=1$ y $x=n-1=14$; también tiene raíces no triviales $x=4,11$. \\
+$11^2 \mod 15 = 121 \mod 15 = 1$, es decir, $11^2 \equiv 1 \pmod {15}$. Lo mismo sucede con cualquier otras raíz no trivial. \\
+Luego, al tener raíces no triviales es compuesto. \\
+Nótese que en el rango $[2,13]$ sólo dos enteros son raíces no triviales. \\
+Con $n=105$, $x^2 \equiv 1 \pmod {105}$ tiene raíces triviales $x=1$ y $x=n-1=104$; también tiene raíces no triviales $x=29,34,41,64,71,76$. \\
+$71^2 \mod 105 = 5041 \mod 105 = 1$, es decir, $71^2 \equiv 1 \pmod {105}$. Lo mismo sucede con las otras raíces no triviales. \\
+Luego, al tener raíces no triviales es compuesto. \\
+Nótese que en el rango $[2,103]$ sólo seis enteros son raíces no triviales.
+\end{ejemplo}
+
+Cuando $n$ es compuesto, de los enteros $a$ coprimos con $n$ en el rango $2 \leq a \leq n-2$, no todos son raíces no triviales. 
+Pero muchos de ellos conducen a las raíces no triviales de un modo ingenioso que incluye exponenciación al cuadrado.
+
+\begin{ejemplo} \, \\
+\textbf{Con} $\boldsymbol{n=105}$. \\
+$n-1 = 104 = 2^t \cdot u = 2^3 \cdot 13$. \\
+$a=13$: \\
+$x_0 = a^{u} \mod n =13^{13} \mod 105 = 13$. \\
+$x_1 = x_0^2 \mod n = 13^2 \mod 105 = 64$. \\
+$x_2 = x_1^2 \mod n = 64^2 \mod 105 = 1$. \\
+Ya hallamos la raíz no trivial $64$, pero partiendo del testigo $a=13$. Diremos que dicha raíz no trivial está en la órbita de $a$. \\
+$a=2$: \\
+$x_0 = a^{u} \mod n =2^{13} \mod 105 = 2$. \\
+$x_1 = x_0^2 \mod n = 2^2 \mod 105 = 4$. \\
+$x_2 = x_1^2 \mod n = 4^2 \mod 105 = 16$. \\
+$x_3 = x_2^2 \mod n = 16^2 \mod 105 = 46$. \\
+No hallamos una raíz no trivial partiendo de $a=2$, aunque en este caso dicho entero funge como testigo de Fermat de que $n=105$ es compuesto, pues $a^{n-1} \mod n = 2^{104} \mod 105 = 46 = x_3$, es decir, $a^{n-1} \not\equiv 1 \pmod n$. \\
+\textbf{Con} $\boldsymbol{n=91}$. \\
+$n-1 = 90 = 2^t \cdot u = 2^1 \cdot 45$. \\
+$a=9$: \\
+$x_0 = a^{u} \mod n =9^{45} \mod 91 = 1$. \\
+Nótese que como $x_0=1$, $x_1 = x_0^2 \mod n = 1^2 \mod 105 = 1$. En cualquier otro caso o ejemplo con $x_0=1$, cualquier $x_i$ tomará el valor 1. \\
+Como $n=91=7 \cdot 13$ es compuesto, $a=9$ es un (testigo) mentiroso de Miller-Rabin para $n=91$ (pues no permite hallar una raíz no trivial y, en lo que respecta a este entero $a$, $n$ es primo probable). \\
+En efecto, dado que $a^{n-1} \equiv 1 \pmod n$, es decir, $9^{90} \equiv 1 \pmod {91}$, $a=9$ es un (testigo) mentiroso de Fermat para $n=91$.\\
+\textbf{Con} $\boldsymbol{n=9803}$. \\
+$n$ es un primo impar. \\
+Luego, no tiene testigos de Miller-Rabin de que sea compuesto. \\ 
+Probemos con $a=1825$:
+$n-1 = 2^t \cdot u =2 \cdot 4901$. \\
+$x_0 = a^{u} \mod n = 1825^{4901} \mod 9803 = 9802$. Nótese que $9802 \equiv -1 \pmod {9803}$. \\
+$x_1 = x_0^2 \mod n = 9802^2 \mod 9803 = 1$. \\
+Las únicas raíces de la unidad de la ecuación $x^2 \equiv 1 \pmod n$, es decir, de $x^2 \equiv 1 \pmod {9803}$ son 1 y $n-1=9802$. \\
+Tampoco tiene testigos de Fermat de que sea compuesto. \\
+Probemos con $a=899$: $a^{n-1} \equiv 1 \pmod n$, en efecto $899^{9802} \equiv 1 \pmod {9803}$.
+\end{ejemplo}
+
+Nótese que al escribir $n-1 = 2^t \cdot u$, y luego calcular: \\
+$x_0 = a^{u} \mod n$ \\
+$x_i = x_{i-1}^2 \mod n$ \\
+Lo que obtenemos sucesivamente es: \\
+$a^{u} \mod n, (a^{u})^2 \mod n, \ldots, (a^{u})^{2^t} \mod n$, es decir,\\
+$x_0 = a^{u} \mod n, a^{2u} \mod n, a^{4u} \mod n, \ldots, a^{2^tu} \mod n = a^{n-1} \mod n = x_t$. \\ Es a esto que llamamos: la órbita de $a$. \\
+
+Cuando $n$ es compuesto y existe un testigo de Fermat, el Enunciado~\ref{enun:lematestigosFermat} muestra que por lo menos el 50\% de los enteros $a$ coprimos con n en $[2, n-2]$ son testigos de Fermat. Aunque con los números compuestos de Carmichael, no hay un solo testigo de Fermat. \\
+Cuando $n$ es compuesto, como enunciaremos más adelante, es un hecho que por lo menos el 75\% de los enteros $a$ coprimos con $n$ en $[2, n-2]$ son testigos de Miller-Rabin. Nótese que no hay condicional (como en Fermat), no es que si hay un testigo recién hay muchos testigos: siempre existen testigos que prueban que $n$ es compuesto. \\
+Eso no quiere decir que tales enteros $a$ coprimos con $n$ en $[2, n-2]$ son raíces no triviales de 1, sino que las raíces no triviales (que pueden ser pocas, como se vio en los ejemplos) están en la órbita de esos enteros $a$, o que la órbita final termina siendo un testigo de Fermat. \\
+
+Ello diferencia la idea de testigo en Fermat y Miller-Rabin. \\
+Para $n$ compuesto: \\
+En el test de Fermat el entero $a$ coprimo con $n$ es testigo de ello cuando $a^{n-1} \not\equiv 1 \pmod n$. \\
+En el test de Miller-Rabin el entero $a$ coprimo con $n$ es testigo de ello cuando: \\
+. Su órbita da con una raíz no trivial de la unidad. O (al final de la órbita)\\
+. $a^{n-1} \not\equiv 1 \pmod n$ \quad (criterio de Fermat) \\
+Entonces Miller-Rabin es Fermat más una búsqueda de raíces no triviales a lo largo de la secuencia de cuadrados. 
+De modo que si $a$ es un testigo de Fermat de que $n$ es compuesto, $a$ es un testigo de Miller-Rabin.
+La inversa no es cierta, un testigo de Miller-Rabin de que $n$ es compuesto no necesariamente es un testigo de Fermat, como lo muestran los números de Carmichael cuyo problema es evitado en forma potente por Miller-Rabin.
+
+\begin{ejemplo} \, \\
+\textbf{Con} $\boldsymbol{n=85}$. \\
+$n-1 = 84 = 2^t \cdot u = 2^2 \cdot 21$. \\
+$a=2$: \\
+$x_0 = a^{u} \mod n =2^{21} \mod 85 = 32$. \\
+$x_1 = x_0^2 \mod n = 32^2 \mod 85 = 4$. \\
+$x_2 = x_1^2 \mod n = 4^2 \mod 85 = 16$. \\
+No hallamos una raíz no trivial, pero $a=2$ en su última órbita se comporta como testigo de Fermat pues $2^{84} \equiv 16 \pmod {85}$, es decir, $2^{84} \not\equiv 1 \pmod {85}$. Lo que muestra que $n=85$ es compuesto. En efecto, $n=85=5 \cdot 17$.  \\
+\textbf{Con} $\boldsymbol{n=105}$. \\
+$n-1 = 104 = 2^t \cdot u = 2^3 \cdot 13$. \\
+$a=16$: \\
+$x_0 = a^{u} \mod n =16^{13} \mod 105 = 16$. \\
+$x_1 = x_0^2 \mod n = 16^2 \mod 105 = 46$. \\
+$x_2 = x_1^2 \mod n = 46^2 \mod 105 = 16$. \\
+$x_3 = x_2^2 \mod n = 16^2 \mod 105 = 46$. \\
+No hallamos una raíz no trivial, pero $a=16$ en su última órbita se comporta como testigo de Fermat pues $16^{104} \equiv 46 \pmod {105}$, es decir, $16^{104} \not\equiv 1 \pmod {105}$. \\
+Lo que muestra que $n=105$ es compuesto. \\
+$a=13$: \\
+$x_0 = a^{u} \mod n =13^{13} \mod 105 = 13$. \\
+$x_1 = x_0^2 \mod n = 13^2 \mod 105 = 64$. \\
+$x_2 = x_1^2 \mod n = 64^2 \mod 105 = 1$. \\
+Hallamos una raíz no trivial $x=64$, en efecto $64^2 \equiv 1 \pmod {105}$. \\
+Nótese que $a^{n-1} \equiv 1 \pmod n$, es decir, $64^{104} \equiv 1 \pmod {105}$, pero ello es irrelevante por la raíz no trivial hallada. En efecto, $n=105=3 \cdot 5 \cdot 7$. \\
+\textbf{Con} $\boldsymbol{n=561}$ \quad (el número de Carmichael más pequeño) \\
+Cualquier entero $a$ coprimo con $n$ en $[2,559]$, es tal que $a^{n-1} \equiv 1 \pmod n$. De modo que no hay testigos de Fermat. Comprobemos sólo un caso: \\
+$a=113$: \\
+$113^{560} \equiv 1 \pmod {561}$. \\
+Sigamos con Miller-Rabin. \\
+$n-1 = 560 = 2^t \cdot u = 2^4 \cdot 35$. \\
+$a=7$: \\
+$x_0 = a^{u} \mod n =7^{35} \mod 561 = 241$. \\
+$x_1 = x_0^2 \mod n = 241^2 \mod 561 = 298$. \\
+$x_2 = x_1^2 \mod n = 298^2 \mod 561 = 166$. \\
+$x_3 = x_2^2 \mod n = 166^2 \mod 561 = 67$. \\
+$x_4 = x_3^2 \mod n = 67^2 \mod 561 = 1$. \\
+Hallamos una raíz no trivial $x=67$, en efecto $67^2 \equiv 1 \pmod {561}$.  Por tanto, $a=7$ es un testigo de que $n=561$ es compuesto. En efecto, $561 = 3 \cdot 11 \cdot 17$.
+\end{ejemplo}
+
+Estas ideas se integran en dos algoritmos. 
+
+\begin{lstlisting}[caption={Verifica si $a$ atestigua que $n$ es compuesto}, label={alg:AlgTestifica}, mathescape=true]
+# Entrada: $a,n$
+# Salida: True si $a$ testifica que $n$ es compuesto
+          False en otro caso 
+          
+TestificacionDeQue-$n$-EsCompuesto($a,n$)
+$n-1 = 2^t \cdot u$  $\quad\quad\quad\quad\quad\quad\quad$  # $u$ impar y $t \geq 1$
+$x_0 = a^u \mod n$
+if $(x_0 = 1)$ OR $(x_0 = n-1)$:
+    return False
+for $i=1$ hasta $t-1$:
+    $x_i = (x_{i-1})^2 \mod n$
+    if $x_i = n-1$: 
+        return False
+$x_t = (x_{t-1})^2 \mod n \quad \quad \quad \quad$ # aqui se calcula $a^{n-1} \mod n$
+if $x_t \neq 1$:
+   return True  
+Else:
+   return False
+\end{lstlisting}
+
+El Algoritmo~\ref{alg:AlgTestifica} calcula la función TestificacionDeQue-$n$-EsCompuesto($a,n$), que hace precisamente ello, averigua si $a$ es un testigo de Miller-Rabin de que $n$ es compuesto. \\
+
+Ya se dijo que, cuando $n$ es compuesto, por lo menos el 75\% de los enteros $a$ \textbf{coprimos} con $n$ en $[2, n-2]$ son testigos de Miller-Rabin. \\
+Con la licencia de añadir los testigos triviales (Enunciado~\ref{enun:testigostriviales}) -por ejemplo, agregando el cálculo del mcd al inicio-, entonces por lo menos la mitad de los enteros $a$ en el rango son testigos. \\
+Dado el entero $a$ podemos repetir lo dicho en Fermat: \\
+
+prob(imprimir False, cuando $n$ es primo) = 1. \\
+prob(imprimir False, cuando $n$ es compuesto) = 1/2. \quad (esto es un error) \\
+
+Podemos reducir la probabilidad de error, repitiendo el procedimiento, es decir, elegir varios enteros $a$. El Algoritmo~\ref{alg:AlgMiller} completa la idea.
+
+\begin{lstlisting}[caption={Algoritmo de Miller-Rabin}, label={alg:AlgMiller}, mathescape=true]
+# Entrada: $n$
+# Salida: "primo probable" cuando $n$ es probablemente primo
+          "compuesto" cuando $n$ es compuesto
+
+Elegir al azar $k$ numeros $a_i$, $2 \leq a_i \leq n-2$, es decir, $2 \leq a_1, \ldots, a_k \leq n-2$
+if $\exists a_i$ TestificacionDeQue-$n$-EsCompuesto($a_i,n$):
+   print($n$ es compuesto)
+else:
+   print($n$ es primo probable)
+\end{lstlisting}
+
+De manera análoga a Fermat, en virtud a la repetición: \\
+
+prob(imprimir primo (probable), cuando $n$ es primo) = 1 \\
+prob(imprimir primo (probable), cuando $n$ es compuesto) $\leq \frac{1}{2^k}$. \\
+
+Nótese que cuando $k$ crece, la probabilidad de error tiende a ser muy pequeña. \\
+A diferencia de Fermat, en Miller-Rabin siempre hay testigos si $n$ es compuesto. Bastantes. \\
+
+En efecto, si el algoritmo dice que $n$ es probable primo, cuando $n$ es primo, es correcto. \\
+Si $n$ es compuesto la probabilidad de error (de que el algoritmo diga que es probable primo equivocadamente), $\leq \frac{1}{2^k}$, es despreciable incluso para $k$ no muy grande, digamos 30 o 40. \\
+Es más, en el rango $[2,n-2]$, cuando $n$ es compuesto, entre  testigos triviales y testigos de Miller-Rabin, decir que son la mitad, es bastante conservador. \\
+
+Dado un $n$ compuesto, que por lo menos el 75\% de los enteros $a$ coprimos con $n$ en $[2, n-2]$ sean testigos de Miller-Rabin quiere decir que a lo más el 25\% de los enteros $a$ coprimos con $n$ en $[2, n-2]$ son mentirosos. \\
+Es decir, de los enteros $a$ coprimos con $n$ en $[2, n-2]$ hay quienes dicen que $n$ es primo cuando $n$ es compuesto. Mienten. \\
+Los contaremos para hallar que son a lo más $1/4$ del conjunto de interés.\\
+
+Dado $n$ compuesto ¿cuándo $a$ coprimo con $n$ en $[2, n-2]$ es un mentiroso al no lograr detectar una raíz no trivial en su órbita y tampoco detectar que, al final de su órbita, $a^{n-1} \not\equiv 1 \pmod n$? \\
+Ello sucede cuando, con $n-1 = 2^t \cdot u$, $u$ impar y $t \geq 1$: \\
+. $x_0 = a^u \mod n = 1$ o $x_0 = a^u \mod n = n-1$, pues en ese caso todos los valores subsiguientes $x_1, \dots, x_t$ serán $1$. \\
+. O bien, algún $x_i$ con $i=1, \dots,t-1$, es tal que $x_i=n-1$ o, lo que es lo mismo, algún $x_i$ con $i=1, \dots,t-1$, es tal que $x_i \equiv -1 \pmod n$. \\
+Dicho de forma compacta, $a$ es mentiroso si $x_0 \equiv 1 \pmod n$ o si existe algún $i \in \{0,\dots,t-1\}$ tal que $x_i \equiv -1 \pmod n$. \\
+Más coloquialmente, $a$ es mentiroso si la secuencia de los $x_i$ empieza en $1$ o en ella aparece $n-1$ antes del final.
+
+\begin{ejemplo} 
+\textbf{Con el compuesto} $\boldsymbol{n=115417=211 \cdot 547}$. \\
+$n-1 = 115416 = 2^t \cdot u = 2^3 \cdot 14427$. \\
+$a=14$: \\
+$x_0 = a^{u} \mod n =14^{14427} \mod 115417 = 1$. \\
+Nótese que como $x_0=1$, $x_1 = x_2 = x_3 = 1$, $a$ es un mentiroso de Miller-Rabin, no logra detectar que $n$ es compuesto hallando una raíz no trivial en su órbita y lo da como primo probable. \\
+Por tanto es también un mentiroso de Fermat, pues: \\
+$x_3 = a^{n-1} \equiv 1 \pmod n$, es decir, $14^{115416} \equiv 1 \pmod {115417}$. \\
+No logra detectar que $n$ es compuesto y lo da como primo probable. \\
+\textbf{Con el compuesto} $\boldsymbol{n=2984257=1657 \cdot 1801}$. \\
+$n-1 = 2984256 = 2^t \cdot u = 2^6 \cdot 46629$. \\
+$a=12$: \\
+$x_0 = a^{u} \mod n =12^{46629} \mod 2984257 = 2984256 = n-1$. \\
+Como $2984256 \equiv -1 \pmod {2984257}$, podemos usar $x_0=-1$. \\
+Nótese que como $x_0=-1$, $x_1 = \dots = x_6 = 1$, $a$ es un mentiroso de Miller-Rabin, no logra detectar que $n$ es compuesto hallando una raíz no trivial en su órbita y lo da como primo probable. \\
+Por tanto es también un mentiroso de Fermat, pues: \\
+$x_6 = a^{n-1} \equiv 1 \pmod n$, es decir, $12^{2984256} \equiv 1 \pmod {2984257}$. \\
+No logra detectar que $n$ es compuesto y lo da como primo probable. \\
+\textbf{Con el compuesto} $\boldsymbol{n=65=5 \cdot 13}$. \\
+$n-1 = 64 = 2^t \cdot u = 2^6 \cdot 1$. \\
+$a=8$: \\
+$x_0 = a^{u} \mod n =8^{1} \mod 65 = 8$. \\
+$x_1 = x_0^{2} \mod n =8^{2} \mod 65 = 64 = n-1$. \\
+Como $64 \equiv -1 \pmod {65}$, podemos usar $x_1=-1$. \\
+Nótese que como $x_1=-1$, $x_2= \dots = x_6 = 1$, $a$ es un mentiroso de Miller-Rabin, no logra detectar que $n$ es compuesto hallando una raíz no trivial en su órbita y lo da como primo probable. \\
+Por tanto es también un mentiroso de Fermat, pues: \\
+$x_6 = a^{n-1} \equiv 1 \pmod n$, es decir, $8^{64} \equiv 1 \pmod {65}$. \\
+No logra detectar que $n$ es compuesto y lo da como primo probable.
+\end{ejemplo}
+
+Para $n$ compuesto, contaremos cuántos hay de estos enteros $a$ mentirosos de Miller-Rabin, para los cuales $x_0=1$ o entre $x_1$ y $x_{t-1}$ aparece $n-1$ (congruente con $-1$), en cuyo caso $x_t=a^{n-1} \equiv 1 \pmod n$ y por tanto son también mentirosos de Fermat. \\
+Lo mismo puede decirse así:\\
+Para  $n = p_1^{a_1} p_2^{a_2} \cdots p_k^{a_k}$. \\
+$n-1 = 2^t \cdot u$, con $u$ impar y $t \geq 1$. \\
+Contaremos cuántos enteros $a$ en el rango $[2,n-2]$ coprimos con $n$ son tales que: \\
+$x_0 \equiv 1 \pmod n$. O bien \\
+$x_i \equiv -1 \pmod n$, para algún $i \in \{0,\dots,t-1\}$. \\
+
+Ese es el caso general, en este texto lo mostraremos para el caso $n=pq$, con $p,q$ primos. \\
+
+Nótese que por la forma de $x_i$ las condiciones para que $a$ sea mentiroso de Miller-Rabin pueden reescribirse así: \\
+$a^{u} \equiv 1 \pmod n$ \\
+$a^{2^{i}u} \equiv -1 \pmod n$, con $i=0, \dots, t-1$\\
+De cumplirse, inexorablemente $a$ será también un mentiroso de Fermat, con \\
+$a^{2^{t}u} = a^{n-1} \equiv 1 \pmod n$. \\
+
+Por el tecnicismo de los Enunciados ~\ref{enun:desdoblar} y ~\ref{enun:desdoblar2}: \\
+La primera condición puede desdoblarse así: \\
+$a^u \equiv 1 \pmod p$\\
+$a^u \equiv 1 \pmod q$\\
+La segunda condición puede desdoblarse así (con $i=0, \dots, t-1$): \\
+$a^{2^{i}u} \equiv -1 \pmod p$\\
+$a^{2^{i}u} \equiv -1 \pmod q$\\
+
+Donde $a$ es la incógnita (queremos saber cuántos de estos mentirosos hay). \\
+El desdoblamiento es útil pues, por el tecnicismo del Enunciado~\ref{enun:productosol}, el número de soluciones para el módulo $n$ se obtiene del producto de las soluciones para $p$ y para $q$, que son menos complejas de hallar.
+
+\begin{ejemplo}
+Con $n = 145 = 5 \cdot 29$. \\
+$n-1 = 144 = 2^t \cdot u = 2^4 \cdot 9.$ \\
+$CRR(n)=\{1,2,3, \dots, 142,143,144\}$. \\
+Por el Enunciado~\ref{enun:propTotiente} $\phi(n) = \phi(p) \cdot \phi(q) = (p-1)(q-1)=4 \cdot 28 = 142$. \\
+Hay muchos enteros $a$ coprimos con $n$ en el rango $[2,n-2]=[2,143]$. \\
+Los enteros $a$ en dicho rango que no son coprimos con $n$ son testigos triviales. Bastaría con mostrar el $mcd(a,n)$. \\
+Es el caso con $a=58$: $mcd(58,145)=29$. Lo que muestra que $n$ es compuesto. \\
+Si un algoritmo estuviera seleccionando al azar enteros $a$ en el rango, podría elegir testigos de que $n$ es compuesto. \\
+Es el caso con $a=31$ coprimo con $n$: \\
+$x_0 = a^{u} \mod n =31^{9} \mod 145 = 106$. \\
+$x_1 = x_0^{2} \mod n = 106^{2} \mod 145  = a^{2^{1}u} \mod n = 31^{2 \cdot 9} \mod 145 = 71$. \\
+$x_2 = x_1^{2} \mod n = \; 71^{2} \mod 145  = a^{2^{2}u} \mod n = 31^{4 \cdot 9} \mod 145 = 111$. \\
+$x_3 = x_2^{2} \mod n = 111^{2} \mod 145  = a^{2^{3}u} \mod n = 31^{8 \cdot 9} \mod 145 = 141$. \\
+$x_4 = x_3^{2} \mod n = 141^{2} \mod 145  = a^{2^{4}u} \mod n = 31^{16 \cdot 9} \mod 145 = 16$. $a^{n-1} \nequiv 1 \pmod n$. \\
+Lamentablemente el algoritmo podría elegir mentirosos. Pero dichos mentirosos no son muchos, son a lo más $\frac{\phi(n)}{4}$. \\
+$a=12,17,128,133$ son mentirosos (sin contar los triviales $1$ y $n-1$). \\
+Probemos con $a=128$ (los otros casos son análogos): \\
+$x_0 = a^{u} \mod n =128^{9} \mod 145 = 128$. \\
+$x_1 = x_0^{2} \mod n = 128^{2} \mod 145  = a^{2^{1}u} \mod n = 128^{2 \cdot 9} \mod 145 = 144$. \\
+$144$ es congruente con $-1$. A partir de ahí todo será $1$. $a=128$ no logra detectar que $n$ es compuesto hallando una raíz no trivial en su órbita y lo da como primo probable. Miente.\\
+$a^u \nequiv 1 \pmod n$. Pero:\\
+$a^{2^{i}u} \equiv -1 \pmod n$, para i=1. \\
+Veamos qué pasa cuando desdoblamos las condiciones de un mentiroso (recordemos que $u=9$): \\
+$a^u \equiv 1 \pmod 5$, \, sólo el trivial $a=1$ miente.\\
+$a^u \equiv 1 \pmod {29}$, sólo el trivial $a=1$ miente.\\
+Y, en efecto, $a=1$ es un mentiroso módulo $n$, pero lo descartamos por trivial. \\
+$a^{2^{i}u} \equiv -1 \pmod 5$, \, son mentirosos $a=1,2,3,4$. Descartamos $1$ y $4$ por ser triviales.\\
+$a^{2^{i}u} \equiv -1 \pmod {29}$, son mentirosos $a=1,12,17,28$. Descartamos $1$ y $28$ por ser triviales. \\
+De modo que en este conteo absolutamente manual, hemos hallado dos soluciones módulo $p$ (2,3) y dos soluciones módulo $q$ (12,17), que cumplen la congruencia $a^{2^{i}u} \equiv -1 \pmod p$ y $a^{2^{i}u} \equiv -1 \pmod q$ para algún $i$. \\
+Para el recuento teórico general que haremos es vital, sin embargo, que los mentirosos por cada módulo coincidan en llegar a -1 en la misma etapa $i$, sólo así se puede obtener de ellos un mentiroso global módulo $n$. \\
+Con $a=2$: $x_0=a^u \mod 5= 2$; $x_1= x_0^2 \mod 5 = 4$ (congruente con $-1$). \\
+Con $a=3$: $x_0=a^u \mod 5= 3$; $x_1= x_0^2 \mod 5 = 4$ (congruente con $-1$). \\
+Con $a=12$: $x_0=a^u \mod 29= 2$; $x_1= x_0^2 \mod 29 = 28$ (congruente con $-1$). \\
+Con $a=17$: $x_0=a^u \mod 29= 3$; $x_1= x_0^2 \mod 29 = 28$ (congruente con $-1$). \\
+Coincidentemente, en ambos módulos, los mentirosos llegan a -1 en la misma etapa $i=1$; de modo que cualquier par de soluciones $(a_p,a_q)=(2,12), (3,12), (2,17), (3,17)$ da lugar a una solución global módulo $n$, haciendo un total de 4 mentirosos. \\
+El teorema del resto chino es el camino usual para hallar esta solución global (este mentiroso global).
+Por ejemplo para el par $(a_p,a_q)=(3,17)$ la solución módulo $n=133$.
+\end{ejemplo}
+
+No siempre los mentirosos para cada módulo coinciden en llegar a -1 en la misma etapa $i$. \\
+Si no coinciden en la etapa no forman un par $(a_p,a_q)$ para buscar un mentiroso global módulo $n$. \\
+Por ello, es ingenioso para el recuento de enteros $a$ mentirosos hacerlo por etapa: \\
+Contar cuántos son congruentes con 1 para $x_0$. \\
+Contar cuántos son congruentes con -1 para $x_i$, con $i=0, \dots, t-1$, pero separando cada etapa $i$. \\
+El tecnicismo del Enunciado~\ref{enun:productosol}, ofrece el número de soluciones para el módulo $n$ obtenido del producto de las soluciones para $p$ y para $q$, \textbf{separando cada etapa} $i$, bajo este esquema: \\
+Para cada etapa $i \in \{0,1,2, \dots,t-1\}$: \\
+Calcular $M_p(i)$, el número de soluciones en la etapa $i$ módulo $p$ (equivale a contar el número de mentirosos). \\
+Idem con $M_q(i)$. \\
+Por el tecnicismo mencionado, multiplicar $M_p(i) \cdot M_q(i)$. \\
+Sumar todos esos productos: $M_n = \sum_i M_p(i) \cdot M_q(i)$. \\
+
+El Enunciado~\ref{enun:numsol} nos proporciona la forma de hallar el número de soluciones para cada ecuación particular en base al número de soluciones de la ecuación genérica $x^k \equiv b \pmod p$, que es $d=mcd(k,p-1)$ si $b^{(p-1)/d} \equiv 1 \pmod p$. \\
+
+Notación: \\
+$n=pq$. \\
+$\phi(n) = (p-1)(q-1)$. \\
+$n-1=2^tu$ ($u$ impar). \\
+$p-1 = 2^{t_p}u_p,\quad q-1=2^{t_q}u_q,\quad u_p,u_q$ impares. \\
+$g_p = mcd(u,u_p),\quad g_q = mcd(u,u_q)$. \\
+$s = min(t_p,t_q)$. 
+
+\begin{enunciado} [Número de mentirosos caso $n=pq$]\label{enun:nummentirosos}\leavevmode\par 
+Sea $n=pq$ con $p,q$ primos diferentes impares. \\
+El número de mentirosos de Miller-Rabin es: \\
+$mcd(u,p-1) \cdot mcd(u,q-1) \cdot \left(1 + \frac{4^s - 1}{3}\right)$.
+\end{enunciado}
+
+\begin{proof}
+\textbf{Caso} $a^u\equiv 1 \pmod p$. \\
+Respecto de la solución genérica: $b=1$, $d=mcd(u,p-1)$, de modo que la condición para que hayan soluciones, $1^{(p-1)/d} \equiv 1 \pmod p$, se cumple inmediatamente. El conteo da: \\
+$mcd(u,p-1)$ \\
+$= mcd(u,2^{t_p}u_p)$ \qquad pues $p-1 = 2^{t_p}u_p$ \\
+$= mcd(u,u_p)$ \qquad \quad $2^{t_p}$ desaparece porque $u,u_p$ son impares, no tienen a $2$ como factor común \\
+$= g_p$. \\
+Eso da $M_p(0)$ para este caso. \\
+Análogamente para $q$ el conteo da $g_q$. \\
+\textbf{Caso} $a^{2^iu}\equiv -1 \pmod p$, con $0\leq i < t$. \\
+Respecto de la solución genérica: \\
+$b=-1$ \\
+$d = mcd(2^iu,p-1) = mcd(2^iu,2^{t_p}u_p) = 2^{\min(i,t_p)}mcd(u,u_p) = 2^{\min(i,t_p)}g_p$ \\
+De modo que la condición para que hayan soluciones es: $(-1)^{(p-1)/mcd(k,p-1)}\equiv1\pmod p$. \\
+Es decir que $(p-1)/mcd(k,p-1) =  \frac{2^{t_p}u_p}{2^{\min(i,t_p)}g_p}$ sea par. \\
+Ello ocurre cuando $i<t_p$, pues si $i \geq t_p$ entonces $\min(i,t_p)=t_p$, las potencias de $2$ se anulan y tenemos un cociente entre impares. \\
+Entonces el conteo da: 
+$\begin{cases}
+2^{i}\,g_p & \text{si } i<t_p \\ 0 & \text{si } i\ge t_p
+\end{cases}$ \\
+Eso da $M_p(i)$ en este caso. \\
+Análogamente con $q$ y $g_q$. \\
+Dado $M_p(i)$ y $M_q(i)$ en todos los casos y etapas, para obtener $M_n$, al contar cada etapa el primer sumando en la expresión siguiente corresponde al caso $a^u\equiv 1 \pmod n$; en el caso de la congruencia con $-1$ el término correspondiente a la etapa $i$ es no nulo solo si $i<t_p$ e $i<t_q$ simultáneamente, ese es el argumento para el límite superior $s-1=min(t_p,t_q)-1$ de la sumatoria en: \\
+$M_n = g_pg_q + \sum_{i=0}^{s-1} (2^i g_p)(2^i g_q)$ \\
+$= g_pg_q + g_pg_q \sum_{i=0}^{s-1} (2^i)(2^i)$ \qquad factorizando $g_pg_q$ \\
+$= g_pg_q + g_pg_q \sum_{i=0}^{s-1} 4^i$ \qquad\qquad obvio \\
+(se tiene una conocida progresión geométrica con razón $r=4$) \\
+$= g_pg_q + g_pg_q(\frac{4^s - 1}{3})$ \qquad\qquad\quad  progresión\\
+$= g_pg_q(1+(\frac{4^s - 1}{3}))$  \qquad\qquad\qquad  obvio
+\end{proof}
+
+Ahora presentamos el resultado que sustenta lo que se viene afirmando, que hay muchos testigos porque el número de mentirosos es pequeño.
+
+\begin{enunciado} [Cota del número de mentirosos]\label{enun:cotamentirosos}\leavevmode\par 
+Sea $n=pq$ con $p,q$ primos diferentes impares. \\
+$M_n \leq \phi(n)/4$ 
+\end{enunciado}
+
+\begin{proof} \textbf{Parte 1}. \\
+\textbf{Caso} $t_p \neq t_q$. \\
+Sin pérdida de generalidad, se puede suponer que $t_p < t_q$, luego $s=t_p$. \\
+Como $p-1 = 2^{t_p}u_p$, entonces $u_p = (p-1)/2^{t_p}$. \\
+Como $g_p = mcd(u,u_p)$, entonces $g_p \mid u_p$ y por el Enunciado~\ref{enun:propDivisibilidad}.ii: $g_p \leq u_p$. \\
+Luego: $g_p \leq (p-1)/2^{t_p}$. \\
+Por un razonamiento análogo: $g_q \leq (q-1)/2^{t_q}$. \\
+Por tanto: $g_pg_q \leq ((p-1)/2^{t_p})((q-1)/2^{t_q}) = \phi(n) / 2^{t_p+t_q}$. \\
+Por otro lado: \\
+$1+(\frac{4^s - 1}{3}) = \frac{3+4^s - 1}{3} = \frac{2+4^s}{3} = \frac{2+4^{t_p}}{3}$. \\
+Como $p$ es primo impar entonces $p-1$ es par y por lo tanto $t_p \geq 1$. Luego es evidente que: \\
+$4 \leq 4^{t_p}$ \qquad\qquad\qquad\qquad\, es decir: \\
+$4 \leq (3\cdot4^{t_p} - 2\cdot4^{t_p})$ \quad\qquad es decir: \\
+$(4 + 2\cdot4^{t_p}) \leq 3\cdot4^{t_p}$ \quad\qquad es decir: \\
+$2(4^{t_p} + 2) \leq 3\cdot4^{t_p}$ \qquad\quad\,\, es decir: \\
+$(2+4^{t_p})/3 \leq (4^{t_p})/2$ \quad\quad\,\, es decir: \\
+$(2+4^{t_p})/3 \leq (2^{2t_p})/2$ \qquad es decir: \\
+$(2+4^{t_p})/3 \leq (2^{2t_p}) \cdot 2^{-1}$ \quad es decir: \\
+$(2+4^{t_p})/3 \leq 2^{2t_p - 1}$. \\
+Luego: \\
+$M_n = g_pg_q(1+(\frac{4^s - 1}{3})) \leq (\phi(n) / 2^{t_p+t_q})(2^{2t_p - 1}) = \phi(n) / 2^{t_p+t_q-(2t_p - 1)} = \phi(n) / 2^{t_q-t_p+1}$. \\
+Como $t_q > t_p$ entonces $t_q - t_p \geq 1$, y por lo tanto $2^{t_q - t_p + 1} \geq 2^{2} = 4$. \\
+Luego: \\
+$M_n \leq \phi(n)/4$. 
+\end{proof}
+
+Antes de continuar con la prueba cuando $t_p = t_q$, probaremos un resultado intermedio.
+
+\begin{enunciado} [Auxiliar]\label{enun:auxiliar}\leavevmode\par 
+Sea $n=pq$ con $p,q$ primos diferentes impares. \\
+Cuando $t_p=t_q=\tau$: \\
+$g_p=u_p \iff u_p \mid u_q, \qquad g_q=u_q \iff u_q \mid u_p$
+\end{enunciado}
+
+\begin{proof}
+$n-1 = pq-1 = (p-1)(q-1)+(p-1)+(q-1) = 2^{2\tau} u_p u_q + 2^\tau u_p + 2^\tau u_q = 2^\tau A$, con $A = 2^\tau u_p u_q + u_p + u_q$. \\ 
+Como $u_p,u_q$ son impares, $A$ es par (suma de dos impares más un término par), de modo que podemos escribir: \\
+$A=2^{v}A'$ con $A'$ impar. Y reescribir $n-1=2^tu$ ($u$ impar) así: \\
+$n-1=2^{\tau+v}A'$. \\
+Donde la parte impar de $n-1$ en un caso se denomina $u$ y en el otro $A'$, que coincide con la parte impar de $A$. \\ 
+Como $u_p$ es impar (coprimo con cualquier potencia de $2$), se cumple: \\
+$u_p\mid u \iff u_p\mid A$. \\
+Como $2^\tau u_pu_q+u_p+u_q \equiv u_q \pmod {u_p}$, entonces: $A\equiv u_q \pmod {u_p}$, es decir, $u_p \mid A-u_q$, es decir $A-u_q = ku_p$, es decir, $A=u_q+ku_p$ \qquad (*).\\
+Si $u_p\mid A$, entonces $A=hu_p$, luego por (*), $u_q+ku_p= hu_p$, es decir, $u_q=(h-k)u_p$, es decir, $u_p \mid u_q$. \\
+Si $u_p \mid u_q$, entonces $u_q = mu_p$. De (*), $A = mu_p+ku_p = (m+k)u_p$, es decir, $u_p \mid A$. \\
+Por tanto, $u_p \mid A \iff u_p \mid u_q$. \\
+Como se cumple que $u_p \mid A \iff u_p \mid u_q$ y que $u_p\mid u \iff u_p\mid A$, entonces se cumple que: $u_p\mid u \iff u_p\mid u_q$. \\
+Luego, $g_p=mcd(u,u_p)=u_p \iff u_p\mid u \iff u_p\mid u_q$. \\
+Por un razonamiento análogo: $g_q=u_q \iff u_q\mid u_p$.
+\end{proof}
+
+\begin{proof} \textbf{Parte 2}. \\
+\textbf{Caso} $t_p = t_q=\tau$. \\
+No es posible que $u_p=u_q$ pues ello implica inmediatamente que $p=q$. Imposible. Por lo tanto, $u_p \neq u_q$. \\
+Sin pérdida de generalidad se puede suponer que $u_p < u_q$. \\
+$g_q \neq u_q$. En efecto, por el Enunciado~\ref{enun:auxiliar}, $g_q=u_q \iff u_q\mid u_p$, lo cual no es posible cuando $u_p < u_q$. \\
+Como $g_q = mcd(u,u_q)$, entonces $g_q \mid u_q$, es decir, $u_q=kg_q$. Y como $g_q \neq u_q$, entonces: \\
+$k \geq 2$ \qquad\qquad //$\cdot g_q$ \\
+$kg_q \geq 2g_q$ \qquad //$\cdot g_q$ \\
+Es decir, pues se sabe que $u_q=kg_q$: \\
+$u_q \geq 2g_q$. Es decir: \\
+$g_q \leq u_q/2$. \\
+Y como $q-1=2^{t_q}u_q$, resulta: \\
+$g_q \leq (q-1)/2^{t_q +1} = (q-1)/2^{\tau +1}$. \\
+Con un razonamiento análogo al del primer caso, resulta: \\
+$g_pg_q \leq  ((p-1)/2^{\tau})((q-1)/2^{\tau +1}) =  \phi(n)/ 2^{2\tau+1}$, \\
+$M_n = g_pg_q(1+(\frac{4^s - 1}{3})) \leq (\phi(n) / 2^{2\tau+1})(2^{2\tau - 1}) = \phi(n) / 2^{2\tau+1-(2\tau - 1)} = \phi(n) / 2^{2} = \phi(n) / 4$. \\
+Es decir:  \\
+$M_n \leq \phi(n)/4$. 
+\end{proof}
+
+\textbf{Lista de Testigos (o bases, es decir, enteros para determinismo)} \\
+Hasta aquí se vio Miller-Rabin desde un punto de vista analítico.
+Hay otro enfoque más de tipo computacional, de trabajo mecánico y repetitivo (de obrero). Muy útil. \\
+Surgen, a manera de tablas, de revisar computacionalmente cada compuesto impar hasta un límite dado, registrando cuáles engañan a bases fijas (enteros fijos) como $a=2$ o $a=2,3,5$, etc. \\
+Afirmaciones prácticas como "las bases $2,3,5,7$ certifican primalidad para $n<3215031751$" \; no son teoremas genéricos sino registros de búsqueda exhaustiva válidos solo hasta donde se ha verificado. \\
+
+\begin{ejemplo}
+Se presenta una versión en miniatura de ese proceso. \\
+Revisar manualmente los compuestos impares menores que 30 para ver si la base (el entero) $a=2$ los detecta. O bien si $a=2$ es un mentiroso que dice que algunos de dichos compuestos son probablemente primos cuando no lo son. \\
+Si tomamos $n < 30$ y restringimos a compuestos impares, la pregunta es: ¿existe alguno para el cual $a=2$ sea un mentiroso o, más bien, $a=2$ detecta que todos son compuestos?  \\
+Los compuestos impares menores que 30 son: [9, 15, 21, 25, 27]. \\
+Miller–Rabin con $a=2$: \\  
+$n=9: 2^8 \equiv 4 \pmod {9}$.  \\
+$n=15: 2^{14} \equiv 4 \pmod {15}$. \\  
+$n=21: 2^{20} \equiv 4 \pmod {21}$.  \\
+$n=25: 2^{24} \equiv 7 \pmod {25}$.  \\
+$n=27: 2^{26} \equiv 13 \pmod {27}$.  \\
+En todos los casos, el test de Miller–Rabin con base 2 detecta que son compuestos. \\
+Para n < 30, basta probar con el testigo a=2: ningún compuesto impar menor que 30 engaña al test de Miller–Rabin con el entero $a=2$.   \\
+No es cierto pero imagine que la cota sea $n<30000000$: en vez de elegir al azar, bastaría tomar $a=2$, si tal entero no testifica que el número en consideración es compuesto, entonces es primo. \\
+Obviamente no se consideran enteros $a$ que no sean coprimos con $n$ (en cuyo caso el cálculo del mcd resuelve las cosas). \\
+\end{ejemplo}
+
+Algo semejante al ejemplo, pero a escala, es como se sustentan las tablas que las implementaciones reales de Miller-Rabin consultan hoy para elegir enteros $a$ confiables. \\
+
+Para números por debajo de ciertos límites, no es necesario elegir enteros al azar; basta con probar un conjunto pequeño de bases fijas para garantizar que el resultado es 100\% exacto:
+\begin{tabular}{c|c}
+   Si $n <$  &  Es suficiente probar las bases $a =$  \\
+   \hline
+ 2,047 & $\{2\}$ \\
+1,373,653 & $\{2, 3\}$ \\
+25,326,001 & $\{2, 3, 5\}$ \\
+3,215,031,751 & $\{2, 3, 5, 7\}$ \\
+2,152,302,898,747 & $\{2, 3, 5, 7, 11\}$ \\
+341,550,071,728,321 & $\{2, 3, 5, 7, 11, 13, 17\}$ \\
+\hline
+\end{tabular}
+
+A un nivel menos computacional y más emparentado con lo analítico: bajo la Hipótesis Extendida de Riemann (ERH), se cree que basta con probar todas las bases $a < 2(\ln n)^2$ para tener una prueba determinística en tiempo polinomial para cualquier $n$.
+
+\section{Test de Lucas}
+El \textit{Test de Lucas} se refiere a una serie de métodos matemáticos utilizados para demostrar la primalidad de un número. A diferencia de las pruebas probabilísticas (como el Test de Fermat o Miller-Rabin), el Test de Lucas puede proporcionar una prueba matemática definitiva (un certificado de primalidad) de que un número es primo.
+
+Existen principalmente tres variantes o aplicaciones fundamentales de este test:
+
+\begin{enumerate}
+    \item El Test de Primalidad de Lucas
+es considerado el "recíproco" del Pequeño Teorema de Fermat y fue propuesto originalmente por Édouard Lucas en 1876.
+
+El Teorema: Un entero $n > 1$ es primo si existe un entero $a$ (llamado raíz primitiva) tal que:
+\begin{enumerate}
+    \item  $a^{n-1} \equiv 1 \pmod n$** (cumple la condición de Fermat).
+    \item $a^{(n-1)/q} \not\equiv 1 \pmod n$ para cada factor primo $q$ de $n-1$.
+    \item Fundamento: Si estas condiciones se cumplen, el orden del número $a$ módulo $n$ es exactamente $n-1$. Como el orden de un elemento debe dividir a $\phi(n)$ (la función de Euler), esto implica que $\phi(n) \geq n-1$, lo cual solo ocurre si $n$ es primo.
+    \item  Limitación: Su principal dificultad radica en que requiere conocer la factorización completa de $n-1$, lo cual es un problema computacionalmente difícil para números muy grandes.
+\end{enumerate}
+
+\item El Test de Lucas-Lehmer (Para números de Mersenne)
+Es una versión simplificada y extremadamente eficiente diseñada específicamente para números de la forma $M_p = 2^p - 1$ (donde $p$ es un primo impar).
+
+Mecanismo: Se define una secuencia recursiva donde $s_1 = 4$ y $s_{k+1} = s_k^2 - 2 \pmod{M_p}$.
+
+Resultado: El número $M_p$ es primo si y solo si el término $s_{p-1} \equiv 0 \pmod{M_p}$.
+
+Importancia: Este test es tan rápido que ha permitido descubrir los números primos más grandes conocidos hasta la fecha.
+
+\item Pseudoprimos de Lucas y el Test BPSW:
+Además de las pruebas definitivas, existen las pruebas de probable primo de Lucas, que utilizan las Sucesiones de Lucas ($U_n, V_n$) en lugar de potencias simples.
+
+Un número compuesto que pasa estas pruebas se llama pseudoprimo de Lucas.
+
+Test BPSW: En la práctica, se combina un test de Miller-Rabin en base 2 con un test de Lucas fuerte. Este método combinado es tan potente que no se conoce ningún número compuesto que lo haya superado, aunque no se ha demostrado formalmente que sea infalible.
+\end{enumerate}
+

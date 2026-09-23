@@ -1,0 +1,156 @@
+\documentclass[12pt,openany,letterpaper]{book}
+
+% --- Paquetes ---
+\usepackage{enumitem}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{silence}
+\usepackage[spanish]{babel}
+\WarningFilter{latex}{Command \showhyphens has changed}
+\usepackage{enumitem}
+\usepackage{cancel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext} 
+\usepackage{newtxmath}
+\usepackage{mathrsfs}
+\usepackage{microtype}
+\usepackage{listings}
+\lstset{
+  language=Python,
+  numbers=left,
+  numberstyle=\small,
+  stepnumber=1,
+  numbersep=10pt
+}
+\renewcommand{\lstlistingname}{Algoritmo}
+\renewcommand{\lstlistlistingname}{Lista de Algoritmos}
+\AtBeginDocument{%
+  \renewcommand{\thelstlisting}{\arabic{lstlisting}}%
+}
+
+
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{emptypage}
+\usepackage{microtype}
+\usepackage{makeidx}
+\setlength{\parindent}{0cm} % Sets paragraph indent to 0 cm
+\makeindex
+
+% --- Parámetros globales de presentación ---
+% Configuración de página
+\geometry{
+    letterpaper,
+    left=3cm,
+    right=2.5cm,
+    top=3cm,
+    bottom=3cm,
+    headheight=15.4pt
+}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=green,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={Teoría de Números},
+    pdfauthor={Tu Nombre},
+    bookmarksnumbered=true
+}
+
+% --- Ajustes ---
+% Ajuste de amsthm: cambiar símbolo de cierre de proof
+\renewcommand{\qedsymbol}{$\blacksquare$}
+% Ajuste de amsthm + babel: cambiar "Demostración" por "Prueba" en negrita
+\addto\captionsspanish{\renewcommand{\proofname}{\textbf{Prueba}}}
+
+% --- Definición de entornos ---
+\newtheorem{propiedad}{Propiedad}
+\newtheorem{enunciado}{Enunciado}
+\theoremstyle{definition} % texo en redonda no cursiva
+%\newtheorem{ejemplo}{Ejemplo}
+\newenvironment{ejemplo}[1][]{\par\medskip\noindent\textbf{Ejemplo.} #1 \rmfamily}{\medskip}
+\theoremstyle{definition}
+\newtheorem{definicion}{Definición}
+\theoremstyle{definition} % texo en redonda no cursiva
+\newtheorem*{solucion}{Solución}
+\newtheorem{teorema}{Teorema}[section]
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{observacion}[teorema]{Observación}
+\newtheorem{corolario}[teorema]{Corolario}
+\newtheorem{proposicion}[teorema]{Proposición}
+
+\newcommand{\jac}[2]{\left(\dfrac{#1}{#2}\right)}
+\newcommand{\legs}[2]{\left(\dfrac{#1}{#2}\right)}
+\usepackage{enumitem}
+\renewcommand{\proofname}{Demostración}
+
+% Comandos personalizados para teoría de números
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\p}{\mathfrak{p}}
+\newcommand{\q}{\mathfrak{q}}
+
+% Funciones aritméticas
+\DeclareMathOperator{\ord}{ord}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\legendre}{\left(\frac{\cdot}{\cdot}\right)}
+\DeclareMathOperator{\jacobi}{\left(\frac{\cdot}{\cdot}\right)}
+\DeclareMathOperator{\kronecker}{\left(\frac{\cdot}{\cdot}\right)}
+
+% Configuración de encabezados
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[CE]{\leftmark}
+\fancyhead[CO]{\rightmark}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Información del documento
+\title{Factorización y primalidad}
+\author{Jorge Teran, Lucio Torrico}
+\date{\today}
+
+\addto\captionsspanish{%
+  \renewcommand{\contentsname}{Tabla de Contenido}%
+}
+
+\begin{document}
+
+% Portada
+%\input{portada}
+% Prefacio
+%\input{prefacio}
+% Capitulos
+\input{capitulo1}
+%\input{capitulo2}
+%\input{capitulo3}
+%\input{capitulo4}
+%\input{capitulo5}
+%\input{capitulo6}
+
+
+% Apéndices
+\appendix
+\addcontentsline{toc}{chapter}{Bibliografía}
+%\input{anexoiso}
+\nocite{*}
+\bibliographystyle{alpha}
+%\bibliography{referencias}
+
+% \printindex
+
+\end{document}
